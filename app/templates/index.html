@@ -3,12 +3,40 @@
 {% block content %}
 <div class="main-menu">
     <h1 class="title">Album ELO Rater</h1>
-    <p class="subtitle">Rank your music collection.</p>
-
+    {% if username %}
+    <p class="subtitle">Welcome, {{ username }}!</p>
     <div class="menu-options">
         <a href="{{ url_for('play') }}" class="btn btn-primary">Start Playing</a>
         <a href="{{ url_for('stats') }}" class="btn btn-secondary">View Scoreboard</a>
         <a href="{{ url_for('ignored_albums') }}" class="btn btn-secondary">Manage Ignored</a>
     </div>
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('logout') }}" class="back-link" style="font-size: 0.9rem;">Change User</a>
+    </div>
+    {% else %}
+    <p class="subtitle">Enter your Last.fm username to begin.</p>
+
+    {% if error %}
+    <div class="error-message" style="color: #ff6b6b; margin-bottom: 15px; text-align: center;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('index') }}" class="login-form" onsubmit="showLoading()">
+        <input type="text" name="username" placeholder="Last.fm Username" required class="username-input">
+        <button type="submit" class="btn btn-primary">Load Albums</button>
+    </form>
+    {% endif %}
 </div>
+
+<div id="loading-overlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Fetching albums from Last.fm...</p>
+</div>
+
+<script>
+    function showLoading() {
+        document.getElementById('loading-overlay').classList.add('active');
+    }
+</script>
 {% endblock %}

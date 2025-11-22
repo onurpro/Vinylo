@@ -71,7 +71,7 @@ def getAlbums(username):
     
     if data is None:
         print("Could not fetch initial album data. Aborting.") # DEBUG LINE
-        return[]
+        return None
     
     totalPages = int(data['topalbums']['@attr']['totalPages'])
     
@@ -79,7 +79,11 @@ def getAlbums(username):
     
     if totalPages > 1:
         for page in range(2, totalPages + 1):
-            parseAlbums(getData(username, page), albumList, page, totalPages)
+            page_data = getData(username, page)
+            if page_data:
+                parseAlbums(page_data, albumList, page, totalPages)
+            else:
+                print(f"Warning: Could not fetch page {page}. Skipping.")
 
     print(f"Succesfully found {len(albumList)} albums")
 
