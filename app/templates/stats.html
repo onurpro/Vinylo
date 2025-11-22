@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="header">
+        <a href="{{ url_for('index') }}" class="back-link">← Menu</a>
+        <h2>Leaderboard</h2>
+    </div>
+
+    <div class="scoreboard">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cover</th>
+                    <th>Album</th>
+                    <th>Artist</th>
+                    <th>ELO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for album in albums %}
+                <tr>
+                    <td class="rank">{{ loop.index }}</td>
+                    <td><img src="{{ album.imageURL }}" alt="Cover" class="mini-cover"></td>
+                    <td class="album-col">{{ album.name }}</td>
+                    <td>{{ album.artistName }}</td>
+                    <td class="elo-col">{{ album.eloScore|int }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

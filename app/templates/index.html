@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-menu">
+    <h1 class="title">Album ELO Rater</h1>
+    <p class="subtitle">Rank your music collection.</p>
+
+    <div class="menu-options">
+        <a href="{{ url_for('play') }}" class="btn btn-primary">Start Playing</a>
+        <a href="{{ url_for('stats') }}" class="btn btn-secondary">View Scoreboard</a>
+        <a href="{{ url_for('ignored_albums') }}" class="btn btn-secondary">Manage Ignored</a>
+    </div>
+</div>
+{% endblock %}

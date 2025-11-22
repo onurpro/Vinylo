@@ -1,0 +1,335 @@
+:root {
+    --bg-color: #0f0f13;
+    --text-color: #ffffff;
+    --accent-color: #6c5ce7;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --font-family: 'Inter', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Main Menu */
+.main-menu {
+    text-align: center;
+    padding: 50px;
+}
+
+.title {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #a8c0ff, #3f2b96);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #888;
+    margin-bottom: 40px;
+}
+
+.menu-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+}
+
+/* Play Mode */
+.play-container {
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.back-link {
+    color: #888;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: white;
+}
+
+.matchup {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.album-card {
+    position: relative;
+    width: 350px;
+    height: 500px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+}
+
+.album-card:hover {
+    transform: scale(1.02);
+}
+
+.album-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(30px) brightness(0.4);
+    z-index: 0;
+}
+
+.album-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    /* Slight overlay */
+}
+
+.album-cover {
+    width: 250px;
+    height: 250px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+}
+
+.album-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+.artist-name {
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.elo-badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.vs-badge {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #555;
+}
+
+/* Stats */
+.stats-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.scoreboard {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid var(--card-border);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    color: #888;
+    font-weight: 600;
+    border-bottom: 1px solid var(--card-border);
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.rank {
+    font-weight: 800;
+    color: var(--accent-color);
+    width: 50px;
+}
+
+.mini-cover {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.album-col {
+    font-weight: 600;
+}
+
+.elo-col {
+    font-family: monospace;
+    font-weight: 600;
+    color: #ccc;
+}
+
+/* Ignore Feature */
+.ignore-btn {
+    margin-top: 15px;
+    font-size: 0.8rem;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+    position: relative;
+}
+
+.ignore-btn:hover {
+    color: #ff6b6b;
+    text-decoration: underline;
+}
+
+.ignored-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+}
+
+.ignored-card {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 1;
+}
+
+.ignored-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(3px) grayscale(0.5);
+    transition: filter 0.3s;
+}
+
+.ignored-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.ignored-card:hover .ignored-overlay {
+    opacity: 1;
+}
+
+.ignored-card:hover .ignored-cover {
+    filter: blur(5px) grayscale(0.8);
+}
+
+.ignored-overlay span {
+    color: white;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: var(--accent-color);
+    border-radius: 20px;
+}
+
+.ignored-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    font-size: 0.8rem;
+    text-align: center;
+    pointer-events: none;
+}
+
+.ignored-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

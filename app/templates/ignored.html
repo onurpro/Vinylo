@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="header">
+        <a href="{{ url_for('index') }}" class="back-link">← Menu</a>
+        <h2>Ignored Albums</h2>
+    </div>
+
+    <div class="ignored-grid">
+        {% for idx, album in albums %}
+        <div class="ignored-card" data-idx="{{ idx }}" onclick="unignoreAlbum(this.dataset.idx)">
+            <img src="{{ album.imageURL }}" alt="{{ album.name }}" class="ignored-cover">
+            <div class="ignored-overlay">
+                <span>Unignore</span>
+            </div>
+            <div class="ignored-info">
+                <div class="ignored-name">{{ album.name }}</div>
+            </div>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #888; width: 100%;">No ignored albums.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function unignoreAlbum(idx) {
+        fetch('/api/unignore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                idx: idx
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error un-ignoring album');
+                }
+            });
+    }
+</script>
+{% endblock %}

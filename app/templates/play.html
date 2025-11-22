@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="play-container">
+    <div class="header">
+        <a href="{{ url_for('index') }}" class="back-link">← Menu</a>
+        <h2>Choose your favorite</h2>
+    </div>
+
+    <div class="matchup" id="matchup-container" data-idx1="{{ idx1 }}" data-idx2="{{ idx2 }}">
+        <!-- Album 1 -->
+        <div class="album-card" onclick="vote('1')">
+            <div class="album-bg" style="background-image: url('{{ album1.imageURL }}')"></div>
+            <div class="album-content">
+                <img src="{{ album1.imageURL }}" alt="{{ album1.name }}" class="album-cover">
+                <div class="album-info">
+                    <h3 class="album-name">{{ album1.name }}</h3>
+                    <p class="artist-name">{{ album1.artistName }}</p>
+                    <span class="elo-badge">{{ album1.eloScore|int }}</span>
+                </div>
+                <div class="ignore-btn" data-idx="{{ idx1 }}"
+                    onclick="event.stopPropagation(); ignoreAlbum(this.dataset.idx)">Ignore this album
+                </div>
+            </div>
+        </div>
+
+        <div class="vs-badge">VS</div>
+
+        <!-- Album 2 -->
+        <div class="album-card" onclick="vote('2')">
+            <div class="album-bg" style="background-image: url('{{ album2.imageURL }}')"></div>
+            <div class="album-content">
+                <img src="{{ album2.imageURL }}" alt="{{ album2.name }}" class="album-cover">
+                <div class="album-info">
+                    <h3 class="album-name">{{ album2.name }}</h3>
+                    <p class="artist-name">{{ album2.artistName }}</p>
+                    <span class="elo-badge">{{ album2.eloScore|int }}</span>
+                </div>
+                <div class="ignore-btn" data-idx="{{ idx2 }}"
+                    onclick="event.stopPropagation(); ignoreAlbum(this.dataset.idx)">Ignore this album
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function vote(winnerVal) {
+            const container = document.getElementById('matchup-container');
+            const idx1 = parseInt(container.dataset.idx1);
+            const idx2 = parseInt(container.dataset.idx2);
+
+            fetch('/api/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idx1: idx1,
+                    idx2: idx2,
+                    winner: winnerVal
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to get new match
+                        window.location.reload();
+                    } else {
+                        alert('Error submitting vote');
+                    }
+                });
+        }
+
+        function ignoreAlbum(idx) {
+            if (!confirm('Are you sure you want to ignore this album? It will be hidden from play mode.')) {
+                return;
+            }
+
+            fetch('/api/ignore', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idx: idx
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error ignoring album');
+                    }
+                });
+        }
+    </script>
+    {% endblock %}

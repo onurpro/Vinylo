@@ -59,6 +59,7 @@ def parseAlbums(data, list, pageNumber, totalPages):
             artistName=item['artist']['name'],
             imageURL=item['image'][-1]['#text']
         )
+        album.playcount = int(item.get('playcount', 0))
         list.append(album)    
 
 
