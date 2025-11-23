@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branding Concepts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Karnak+Pro:wght@700&family=Inter:wght@400;700&family=Space+Grotesk:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+            gap: 50px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .concept-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 250px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Concept 1: Trackle (Wordle Style) */
+        .trackle-logo {
+            font-family: 'serif';
+            /* Fallback for Karnak-like */
+            font-weight: 900;
+            font-size: 48px;
+            letter-spacing: 2px;
+            color: #000;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .trackle-box {
+            background-color: #6aaa64;
+            /* Wordle Green */
+            color: white;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            text-transform: uppercase;
+        }
+
+        .trackle-text {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Concept 2: Vinylo (Retro Pop) */
+        .vinylo-logo {
+            width: 100px;
+            height: 100px;
+            background: #eab308;
+            /* Yellow */
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 8px solid #000;
+        }
+
+        .vinylo-logo::after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .vinylo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: -1px;
+        }
+
+        /* Concept 3: Spinle (Clean Tech) */
+        .spinle-logo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .spinle-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+
+        .s1 {
+            background: #3b82f6;
+        }
+
+        .s2 {
+            background: #ef4444;
+        }
+
+        .s3 {
+            background: #10b981;
+        }
+
+        .s4 {
+            background: #f59e0b;
+        }
+
+        .spinle-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            color: #1f2937;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Branding Concepts</h1>
+
+    <div class="concept-container">
+        <!-- Concept 1 -->
+        <div class="card">
+            <div class="trackle-logo">
+                <div class="trackle-box">T</div>
+                <div class="trackle-box" style="background:#c9b458">R</div>
+                <div class="trackle-box" style="background:#787c7e">X</div>
+            </div>
+            <div class="trackle-text">Trackle</div>
+            <p style="color:#666; text-align:center; margin-top:10px;">The Daily Music Ranker</p>
+        </div>
+
+        <!-- Concept 2 -->
+        <div class="card">
+            <div class="vinylo-logo"></div>
+            <div class="vinylo-text">vinylo</div>
+            <p style="color:#666; text-align:center; margin-top:10px;">Spin. Rank. Repeat.</p>
+        </div>
+
+        <!-- Concept 3 -->
+        <div class="card">
+            <div class="spinle-logo">
+                <div class="spinle-dot s1"></div>
+                <div class="spinle-dot s2"></div>
+                <div class="spinle-dot s3"></div>
+                <div class="spinle-dot s4"></div>
+            </div>
+            <div class="spinle-text">Spinle</div>
+            <p style="color:#666; text-align:center; margin-top:10px;">Sort Your Sound</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,10 +1,11 @@
 :root {
-    --bg-color: #0f0f13;
-    --text-color: #ffffff;
-    --accent-color: #6c5ce7;
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --card-border: rgba(255, 255, 255, 0.1);
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --accent-color: #eab308;
+    --card-bg: #f8f9fa;
+    --card-border: #e5e7eb;
     --font-family: 'Inter', sans-serif;
+    --font-header: 'Space Grotesk', sans-serif;
 }
 
 * {
@@ -41,13 +42,12 @@ a {
 }
 
 .title {
+    font-family: var(--font-header);
     font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(to right, #a8c0ff, #3f2b96);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    color: var(--text-color);
     margin-bottom: 10px;
+    letter-spacing: -2px;
 }
 
 .subtitle {
@@ -64,24 +64,41 @@ a {
 
 .btn {
     padding: 15px 30px;
-    border-radius: 30px;
-    font-weight: 600;
+    border-radius: 12px;
+    font-weight: 700;
+    font-family: var(--font-header);
     transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn-primary {
     background: var(--accent-color);
-    color: white;
+    color: black;
+    border: 2px solid black;
+    box-shadow: 4px 4px 0px black;
+}
+
+.btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px black;
 }
 
 .btn-secondary {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: white;
+    color: black;
+    border: 2px solid black;
+    box-shadow: 4px 4px 0px black;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+.btn-secondary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px black;
+}
+
+.btn:active {
+    transform: translate(0, 0);
+    box-shadow: 0px 0px 0px black;
 }
 
 /* Play Mode */
@@ -121,12 +138,14 @@ a {
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: white;
+    border: 2px solid black;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
 }
 
 .album-card:hover {
-    transform: scale(1.02);
+    transform: translateY(-5px);
+    box-shadow: 12px 12px 0px rgba(0, 0, 0, 0.1);
 }
 
 .album-bg {
@@ -151,8 +170,7 @@ a {
     justify-content: center;
     padding: 30px;
     text-align: center;
-    background: rgba(0, 0, 0, 0.2);
-    /* Slight overlay */
+    background: white;
 }
 
 .album-cover {
@@ -170,22 +188,35 @@ a {
 }
 
 .artist-name {
-    color: #ccc;
+    color: #666;
     margin-bottom: 15px;
+    font-weight: 500;
 }
 
 .elo-badge {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--accent-color);
+    color: black;
     padding: 5px 15px;
     border-radius: 15px;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
+    border: 2px solid black;
 }
 
 .vs-badge {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #555;
+    font-size: 3rem;
+    font-weight: 900;
+    color: black;
+    font-family: var(--font-header);
+    background: var(--accent-color);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 3px solid black;
+    z-index: 10;
 }
 
 /* Stats */
