@@ -16,6 +16,17 @@ function App() {
     if (storedUser) {
       setUsername(storedUser)
     }
+
+    // Check for Spotify login redirect
+    const params = new URLSearchParams(window.location.search)
+    const urlUsername = params.get('username')
+    if (urlUsername) {
+      // Force logout first to clear any old session
+      localStorage.removeItem('album_elo_user')
+      handleLogin(urlUsername)
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
   }, [])
 
   const handleLogin = (user: string) => {

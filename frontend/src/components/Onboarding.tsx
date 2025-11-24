@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { motion } from 'framer-motion'
-import { User, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
+import { User, ArrowRight, Loader2, AlertCircle, Music } from 'lucide-react'
 
 interface OnboardingProps {
     onLogin: (username: string) => void
@@ -33,6 +33,18 @@ export default function Onboarding({ onLogin }: OnboardingProps) {
                 setError('Failed to connect to the server. Please try again.')
             }
         } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleSpotifyLogin = async () => {
+        try {
+            setIsLoading(true)
+            const res = await axios.get('http://localhost:8000/api/login/spotify')
+            window.location.href = res.data.url
+        } catch (err) {
+            console.error(err)
+            setError('Failed to initialize Spotify login.')
             setIsLoading(false)
         }
     }
@@ -121,6 +133,21 @@ export default function Onboarding({ onLogin }: OnboardingProps) {
                                     )}
                                 </button>
                             </form>
+
+                            <div className="mt-8 flex items-center gap-4">
+                                <div className="h-[2px] flex-1 bg-gray-200" />
+                                <span className="text-gray-400 font-bold uppercase text-sm">Or</span>
+                                <div className="h-[2px] flex-1 bg-gray-200" />
+                            </div>
+
+                            <button
+                                onClick={handleSpotifyLogin}
+                                disabled={isLoading}
+                                className="mt-8 w-full bg-[#1DB954] text-white text-xl font-black rounded-xl py-5 px-6 flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_black] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_black] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                <Music size={24} />
+                                Login with Spotify
+                            </button>
                         </div>
 
                     </div>

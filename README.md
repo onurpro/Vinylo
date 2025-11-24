@@ -4,7 +4,7 @@ Vinylo (formerly AlbumELO) is a web-based application that allows you to rank yo
 
 ## Features
 
--   **Last.fm Integration**: Automatically fetches your top albums from your Last.fm profile.
+-   **Last.fm & Spotify Integration**: Automatically fetches your top albums from your Last.fm profile or Spotify top tracks.
 -   **ELO Rating System**: Uses a robust ELO algorithm to calculate album rankings based on your choices.
 -   **Interactive Play Mode**: 1v1 matchups with album art, artist names, and current scores.
 -   **Smart Filtering**: Automatically filters out "clutter" such as singles, EPs, and albums with low playcounts (< 10).
@@ -17,6 +17,7 @@ Vinylo (formerly AlbumELO) is a web-based application that allows you to rank yo
 -   Python 3.x
 -   Node.js & npm
 -   A Last.fm API Key (Get one [here](https://www.last.fm/api/account/create))
+-   A Spotify App Client ID & Secret (Get one [here](https://developer.spotify.com/dashboard))
 
 ## Installation
 
@@ -38,10 +39,15 @@ Vinylo (formerly AlbumELO) is a web-based application that allows you to rank yo
     pip install -r requirements.txt
     ```
 
-3.  Create a `.env` file in the `backend` directory and add your Last.fm API Key:
+3.  Create a `.env` file in the **root** directory (not backend) and add your keys:
     ```env
     API_KEY=your_lastfm_api_key_here
+    
+    SPOTIFY_CLIENT_ID=your_spotify_client_id
+    SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+    SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/api/callback/spotify
     ```
+    *Note: Ensure your Spotify App Redirect URI in the dashboard matches `http://127.0.0.1:8000/api/callback/spotify` exactly.*
 
 ### Frontend Setup
 

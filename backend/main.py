@@ -3,6 +3,7 @@ import json
 import os
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -18,6 +19,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173", # Vite default
     "http://localhost:3000",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
@@ -86,7 +88,41 @@ def initialize_user(username: str, db: Session = Depends(get_db)):
         db.add(db_album)
     
     db.commit()
+    db.commit()
     return {"message": f"Fetched {len(albums_data)} albums from Last.fm."}
+
+@app.get("/api/login/spotify")
+def login_spotify():
+    try:
+        url = api_client.get_spotify_auth_url()
+        return {"url": url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/callback/spotify")
+def callback_spotify(code: str, db: Session = Depends(get_db)):
+    try:
+        token = api_client.get_spotify_token(code)
+        albums_data, username = api_client.fetch_albums_from_spotify(token)
+        
+        # Check if user already exists, if so, maybe update? 
+        # For now, similar logic to init: check count
+        count = db.query(models.Album).filter(models.Album.username == username).count()
+        
+        if count == 0:
+            for album_dict in albums_data:
+                db_album = models.Album(**album_dict)
+                db.add(db_album)
+            db.commit()
+            
+        # Redirect to frontend with username
+        # Assuming frontend is on localhost:5173 (Vite default) or 3000
+        # We can make this configurable too, but for now hardcode to localhost:5173
+        frontend_url = "http://localhost:5173"
+        return RedirectResponse(url=f"{frontend_url}?username={username}")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/matchup/{username}", response_model=List[schemas.Album])
 def get_matchup(username: str, db: Session = Depends(get_db)):

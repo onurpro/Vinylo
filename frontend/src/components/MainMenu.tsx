@@ -19,42 +19,42 @@ export default function MainMenu({ username, onPlay, onStats, onIgnored, onLogou
                 className="text-center mb-12 flex flex-col items-center gap-4"
             >
                 <img src={logo} alt="Vinylo Logo" className="w-24 h-24" />
-                <h1 className="text-7xl font-bold tracking-tighter text-black">
-                    Vinylo
+                <h1 className="text-6xl md:text-8xl font-black text-black mb-2 tracking-tighter uppercase">
+                    Album<span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 text-stroke-black">ELO</span>
                 </h1>
-                <p className="text-gray-500 tracking-widest uppercase text-sm font-bold">
-                    Welcome back, <span className="text-black">{username}</span>
+                <p className="text-xl font-bold text-gray-500 mb-8">
+                    Logged in as: <span className="text-black">{username}</span>
                 </p>
+
+                <div className="flex flex-col gap-4 w-full max-w-md px-8">
+                    <MenuButton
+                        onClick={onPlay}
+                        icon={<Play size={20} fill="currentColor" />}
+                        label="START RANKING"
+                        primary
+                    />
+                    <MenuButton
+                        onClick={onStats}
+                        icon={<Trophy size={20} />}
+                        label="LEADERBOARD"
+                    />
+                    <MenuButton
+                        onClick={onIgnored}
+                        icon={<Ban size={20} />}
+                        label="MANAGE IGNORED"
+                    />
+
+                    <div className="h-4" /> {/* Spacer */}
+
+                    <button
+                        onClick={onLogout}
+                        className="flex items-center justify-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm font-bold tracking-widest uppercase"
+                    >
+                        <LogOut size={16} />
+                        Log Out
+                    </button>
+                </div>
             </motion.div>
-
-            <div className="flex flex-col gap-4 w-full max-w-sm px-8">
-                <MenuButton
-                    onClick={onPlay}
-                    icon={<Play size={20} fill="currentColor" />}
-                    label="START RANKING"
-                    primary
-                />
-                <MenuButton
-                    onClick={onStats}
-                    icon={<Trophy size={20} />}
-                    label="LEADERBOARD"
-                />
-                <MenuButton
-                    onClick={onIgnored}
-                    icon={<Ban size={20} />}
-                    label="MANAGE IGNORED"
-                />
-
-                <div className="h-4" /> {/* Spacer */}
-
-                <button
-                    onClick={onLogout}
-                    className="flex items-center justify-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm font-bold tracking-widest uppercase"
-                >
-                    <LogOut size={16} />
-                    Log Out
-                </button>
-            </div>
         </div>
     )
 }
