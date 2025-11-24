@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Play, Trophy, LogOut, Ban } from 'lucide-react'
+import { Play, Trophy, LogOut, Ban, Settings } from 'lucide-react'
 import logo from '../assets/logo.svg'
 
 interface MainMenuProps {
@@ -7,10 +7,11 @@ interface MainMenuProps {
     onPlay: () => void
     onStats: () => void
     onIgnored: () => void
+    onSettings: () => void
     onLogout: () => void
 }
 
-export default function MainMenu({ username, onPlay, onStats, onIgnored, onLogout }: MainMenuProps) {
+export default function MainMenu({ username, onPlay, onStats, onIgnored, onSettings, onLogout }: MainMenuProps) {
     return (
         <div className="flex flex-col items-center justify-center h-full w-full z-10 relative">
             <motion.div
@@ -42,6 +43,11 @@ export default function MainMenu({ username, onPlay, onStats, onIgnored, onLogou
                         onClick={onIgnored}
                         icon={<Ban size={20} />}
                         label="MANAGE IGNORED"
+                    />
+                    <MenuButton
+                        onClick={onSettings}
+                        icon={<Settings size={20} />}
+                        label="SETTINGS"
                     />
 
                     <div className="h-4" /> {/* Spacer */}

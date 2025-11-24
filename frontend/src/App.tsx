@@ -5,10 +5,11 @@ import Game from './components/Game'
 import MainMenu from './components/MainMenu'
 import Stats from './components/Stats'
 import IgnoredAlbums from './components/IgnoredAlbums'
+import Settings from './components/Settings'
 
 function App() {
   const [username, setUsername] = useState<string | null>(null)
-  const [view, setView] = useState<'menu' | 'game' | 'stats' | 'ignored'>('menu')
+  const [view, setView] = useState<'menu' | 'game' | 'stats' | 'ignored' | 'settings'>('menu')
 
   useEffect(() => {
     // Check for existing session
@@ -71,6 +72,7 @@ function App() {
                     onPlay={() => setView('game')}
                     onStats={() => setView('stats')}
                     onIgnored={() => setView('ignored')}
+                    onSettings={() => setView('settings')}
                     onLogout={handleLogout}
                   />
                 </motion.div>
@@ -115,6 +117,22 @@ function App() {
                   className="w-full h-screen absolute inset-0"
                 >
                   <IgnoredAlbums username={username} onBack={() => setView('menu')} />
+                </motion.div>
+              )}
+
+              {view === 'settings' && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-screen absolute inset-0"
+                >
+                  <Settings
+                    username={username}
+                    onBack={() => setView('menu')}
+                    onReset={handleLogout}
+                  />
                 </motion.div>
               )}
             </>

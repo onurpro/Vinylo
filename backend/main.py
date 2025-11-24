@@ -91,6 +91,13 @@ def initialize_user(username: str, db: Session = Depends(get_db)):
     db.commit()
     return {"message": f"Fetched {len(albums_data)} albums from Last.fm."}
 
+@app.delete("/api/reset/{username}")
+def reset_user_data(username: str, db: Session = Depends(get_db)):
+    # Delete all albums for the user
+    count = db.query(models.Album).filter(models.Album.username == username).delete()
+    db.commit()
+    return {"message": f"Deleted {count} albums for user {username}", "deleted_count": count}
+
 @app.get("/api/login/spotify")
 def login_spotify():
     try:
@@ -104,16 +111,19 @@ def callback_spotify(code: str, db: Session = Depends(get_db)):
     try:
         token = api_client.get_spotify_token(code)
         albums_data, username = api_client.fetch_albums_from_spotify(token)
+        print(f"DEBUG: Fetched {len(albums_data)} albums from Spotify for {username}")
         
         # Check if user already exists, if so, maybe update? 
         # For now, similar logic to init: check count
         count = db.query(models.Album).filter(models.Album.username == username).count()
+        print(f"DEBUG: Current album count in DB for {username}: {count}")
         
         if count == 0:
             for album_dict in albums_data:
                 db_album = models.Album(**album_dict)
                 db.add(db_album)
             db.commit()
+            print(f"DEBUG: Inserted {len(albums_data)} albums into DB")
             
         # Redirect to frontend with username
         # Assuming frontend is on localhost:5173 (Vite default) or 3000
@@ -132,8 +142,7 @@ def get_matchup(username: str, db: Session = Depends(get_db)):
     
     query = db.query(models.Album).filter(
         models.Album.username == username,
-        models.Album.ignored == False,
-        models.Album.playcount >= 50
+        models.Album.ignored == False
     )
     
     # Simple exclusion of EPs/Singles

@@ -146,6 +146,11 @@ def fetch_albums_from_spotify(access_token: str) -> List[dict]:
     
     for item in data.get("items", []):
         album = item["album"]
+        
+        # Filter out singles and compilations, keep only "album"
+        if album.get("album_type") != "album":
+            continue
+            
         album_name = album["name"]
         
         # Key by name to avoid duplicates
