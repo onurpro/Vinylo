@@ -5,7 +5,7 @@ import { User, ArrowRight, Loader2, AlertCircle, Music } from 'lucide-react'
 import { API_BASE_URL } from '../config'
 
 interface OnboardingProps {
-    onLogin: (username: string) => void
+    onLogin: (username: string, source: string) => void
 }
 
 export default function Onboarding({ onLogin }: OnboardingProps) {
@@ -22,10 +22,10 @@ export default function Onboarding({ onLogin }: OnboardingProps) {
 
         try {
             // Call the init endpoint
-            await axios.post(`${API_BASE_URL}/api/init/${username}`)
+            await axios.post(`${API_BASE_URL}/api/init/${username}?source=lastfm`)
 
             // If successful, notify parent
-            onLogin(username)
+            onLogin(username, 'lastfm')
         } catch (err: any) {
             console.error(err)
             if (err.response && err.response.status === 404) {

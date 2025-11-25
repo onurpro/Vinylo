@@ -43,11 +43,14 @@ def read_root():
     return {"message": "AlbumELO API is running"}
 
 @app.post("/api/init/{username}")
-def initialize_user(username: str, db: Session = Depends(get_db)):
+def initialize_user(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     # Check if user already has data
-    count = db.query(models.Album).filter(models.Album.username == username).count()
+    count = db.query(models.Album).filter(
+        models.Album.username == username,
+        models.Album.source == source
+    ).count()
     if count > 0:
-        return {"message": f"User {username} already has {count} albums."}
+        return {"message": f"User {username} ({source}) already has {count} albums."}
 
     # Check for legacy JSON file in root
     # Assuming CWD is the project root (AlbumELO)
@@ -68,7 +71,8 @@ def initialize_user(username: str, db: Session = Depends(get_db)):
                         image_url=item['imageURL'],
                         playcount=item.get('playcount', 0),
                         elo_score=item.get('eloScore', 1500.0),
-                        ignored=item.get('ignored', False)
+                        ignored=item.get('ignored', False),
+                        source=source
                     )
                     db.add(db_album)
             db.commit()
@@ -93,9 +97,12 @@ def initialize_user(username: str, db: Session = Depends(get_db)):
     return {"message": f"Fetched {len(albums_data)} albums from Last.fm."}
 
 @app.delete("/api/reset/{username}")
-def reset_user_data(username: str, db: Session = Depends(get_db)):
+def reset_user_data(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     # Delete all albums for the user
-    count = db.query(models.Album).filter(models.Album.username == username).delete()
+    count = db.query(models.Album).filter(
+        models.Album.username == username,
+        models.Album.source == source
+    ).delete()
     db.commit()
 
     # Delete legacy JSON file if it exists
@@ -132,7 +139,10 @@ def callback_spotify(code: str, db: Session = Depends(get_db)):
         
         # Check if user already exists, if so, maybe update? 
         # For now, similar logic to init: check count
-        count = db.query(models.Album).filter(models.Album.username == username).count()
+        count = db.query(models.Album).filter(
+            models.Album.username == username,
+            models.Album.source == "spotify"
+        ).count()
         print(f"DEBUG: Current album count in DB for {username}: {count}")
         
         if count == 0:
@@ -142,21 +152,22 @@ def callback_spotify(code: str, db: Session = Depends(get_db)):
             db.commit()
             print(f"DEBUG: Inserted {len(albums_data)} albums into DB")
             
-        # Redirect to frontend with username
+        # Redirect to frontend with username and source
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        return RedirectResponse(url=f"{frontend_url}?username={username}")
+        return RedirectResponse(url=f"{frontend_url}?username={username}&source=spotify")
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/matchup/{username}", response_model=List[schemas.Album])
-def get_matchup(username: str, db: Session = Depends(get_db)):
+def get_matchup(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     # Filter active albums
     # Logic: playcount >= 50, not ignored, no "EP"/"Single" in title (simplified for now)
     # We can make these filters configurable later
     
     query = db.query(models.Album).filter(
         models.Album.username == username,
+        models.Album.source == source,
         models.Album.ignored == False
     )
     
@@ -203,9 +214,10 @@ def vote(vote_req: schemas.VoteRequest, db: Session = Depends(get_db)):
     }
 
 @app.get("/api/stats/{username}", response_model=List[schemas.Album])
-def get_stats(username: str, db: Session = Depends(get_db)):
+def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     albums = db.query(models.Album).filter(
         models.Album.username == username,
+        models.Album.source == source,
         models.Album.ignored == False
     ).order_by(models.Album.elo_score.desc()).all()
     return albums
@@ -221,9 +233,10 @@ def ignore_album(album_id: int, db: Session = Depends(get_db)):
     return {"success": True}
 
 @app.get("/api/ignored/{username}", response_model=List[schemas.Album])
-def get_ignored_albums(username: str, db: Session = Depends(get_db)):
+def get_ignored_albums(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     albums = db.query(models.Album).filter(
         models.Album.username == username,
+        models.Album.source == source,
         models.Album.ignored == True
     ).all()
     return albums

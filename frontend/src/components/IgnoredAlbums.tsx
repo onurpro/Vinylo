@@ -7,16 +7,17 @@ import { API_BASE_URL } from '../config'
 
 interface IgnoredAlbumsProps {
     username: string
+    source: string
     onBack: () => void
 }
 
-export default function IgnoredAlbums({ username, onBack }: IgnoredAlbumsProps) {
+export default function IgnoredAlbums({ username, source, onBack }: IgnoredAlbumsProps) {
     const [albums, setAlbums] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
 
     const fetchIgnored = async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/api/ignored/${username}`)
+            const res = await axios.get(`${API_BASE_URL}/api/ignored/${username}?source=${source}`)
             setAlbums(res.data)
         } catch (err) {
             console.error("Failed to fetch ignored albums", err)
@@ -27,7 +28,7 @@ export default function IgnoredAlbums({ username, onBack }: IgnoredAlbumsProps) 
 
     useEffect(() => {
         fetchIgnored()
-    }, [username])
+    }, [username, source])
 
     const handleRestore = async (albumId: number) => {
         try {

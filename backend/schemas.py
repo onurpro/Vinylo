@@ -10,6 +10,7 @@ class AlbumBase(BaseModel):
     playcount: int = 0
     elo_score: float = 1500.0
     ignored: bool = False
+    source: str = "lastfm"
     username: str
 
 class AlbumCreate(AlbumBase):

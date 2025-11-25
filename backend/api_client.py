@@ -65,7 +65,8 @@ def fetch_albums_from_lastfm(username: str) -> List[dict]:
                 "playcount": int(item.get('playcount', 0)),
                 "username": username,
                 "elo_score": 1500.0,
-                "ignored": False
+                "ignored": False,
+                "source": "lastfm"
             })
 
     parse_page(data)
@@ -169,7 +170,8 @@ def fetch_albums_from_spotify(access_token: str) -> List[dict]:
                 "playcount": 0, # Spotify doesn't give playcounts per user easily
                 "username": username,
                 "elo_score": 1500.0,
-                "ignored": False
+                "ignored": False,
+                "source": "spotify"
             }
             
     return list(albums_map.values()), username

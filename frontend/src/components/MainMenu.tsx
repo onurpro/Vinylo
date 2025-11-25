@@ -4,6 +4,7 @@ import logo from '../assets/logo.svg'
 
 interface MainMenuProps {
     username: string
+    source: string
     onPlay: () => void
     onStats: () => void
     onIgnored: () => void
@@ -11,7 +12,7 @@ interface MainMenuProps {
     onLogout: () => void
 }
 
-export default function MainMenu({ username, onPlay, onStats, onIgnored, onSettings, onLogout }: MainMenuProps) {
+export default function MainMenu({ username, source, onPlay, onStats, onIgnored, onSettings, onLogout }: MainMenuProps) {
     return (
         <div className="flex flex-col items-center justify-center h-full w-full z-10 relative">
             <motion.div
@@ -23,8 +24,13 @@ export default function MainMenu({ username, onPlay, onStats, onIgnored, onSetti
                 <h1 className="text-6xl md:text-8xl font-black text-black mb-2 tracking-tighter uppercase">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 text-stroke-black">Vinylo</span>
                 </h1>
-                <p className="text-xl font-bold text-gray-500 mb-8">
+                <p className="text-xl font-bold text-gray-500 mb-8 flex items-center gap-2 justify-center">
                     Logged in as: <span className="text-black">{username}</span>
+                    {source === 'spotify' ? (
+                        <span className="bg-[#1DB954] text-white text-xs px-2 py-1 rounded-full border border-black uppercase tracking-wider">Spotify</span>
+                    ) : (
+                        <span className="bg-[#ba0000] text-white text-xs px-2 py-1 rounded-full border border-black uppercase tracking-wider">Last.fm</span>
+                    )}
                 </p>
 
                 <div className="flex flex-col gap-4 w-full max-w-md px-8">

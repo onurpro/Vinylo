@@ -11,9 +11,10 @@ import { API_BASE_URL } from '../config'
 
 interface GameProps {
     username: string
+    source: string
 }
 
-export default function Game({ username }: GameProps) {
+export default function Game({ username, source }: GameProps) {
     const [matchup, setMatchup] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
     const [voting, setVoting] = useState(false)
@@ -25,7 +26,7 @@ export default function Game({ username }: GameProps) {
     const fetchMatchup = async () => {
         try {
             setLoading(true)
-            const res = await axios.get(`${API_BASE_URL}/api/matchup/${username}`)
+            const res = await axios.get(`${API_BASE_URL}/api/matchup/${username}?source=${source}`)
             setMatchup(res.data)
         } catch (err) {
             console.error("Failed to fetch matchup", err)
@@ -36,7 +37,7 @@ export default function Game({ username }: GameProps) {
 
     useEffect(() => {
         fetchMatchup()
-    }, [username])
+    }, [username, source])
 
     useEffect(() => {
         const tutorialSeen = localStorage.getItem('album_elo_tutorial_seen')

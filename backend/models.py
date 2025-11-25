@@ -14,6 +14,7 @@ class Album(Base):
     playcount = Column(Integer, default=0)
     elo_score = Column(Float, default=1500.0)
     ignored = Column(Boolean, default=False)
+    source = Column(String, default="lastfm")
 
     def to_dict(self):
         return {

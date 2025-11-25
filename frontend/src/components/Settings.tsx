@@ -5,11 +5,12 @@ import { API_BASE_URL } from '../config'
 
 interface SettingsProps {
     username: string
+    source: string
     onBack: () => void
     onReset: () => void
 }
 
-export default function Settings({ username, onBack, onReset }: SettingsProps) {
+export default function Settings({ username, source, onBack, onReset }: SettingsProps) {
     const [confirming, setConfirming] = useState(false)
     const [loading, setLoading] = useState(false)
 
@@ -21,7 +22,7 @@ export default function Settings({ username, onBack, onReset }: SettingsProps) {
 
         setLoading(true)
         try {
-            const response = await fetch(`${API_BASE_URL}/api/reset/${username}`, {
+            const response = await fetch(`${API_BASE_URL}/api/reset/${username}?source=${source}`, {
                 method: 'DELETE',
             })
 

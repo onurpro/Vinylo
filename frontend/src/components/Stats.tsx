@@ -7,10 +7,11 @@ import { API_BASE_URL } from '../config'
 
 interface StatsProps {
     username: string
+    source: string
     onBack: () => void
 }
 
-export default function Stats({ username, onBack }: StatsProps) {
+export default function Stats({ username, source, onBack }: StatsProps) {
     const [albums, setAlbums] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
@@ -19,7 +20,7 @@ export default function Stats({ username, onBack }: StatsProps) {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/stats/${username}`)
+                const res = await axios.get(`${API_BASE_URL}/api/stats/${username}?source=${source}`)
                 setAlbums(res.data)
             } catch (err) {
                 console.error("Failed to fetch stats", err)
@@ -28,7 +29,7 @@ export default function Stats({ username, onBack }: StatsProps) {
             }
         }
         fetchStats()
-    }, [username])
+    }, [username, source])
 
     const filteredAlbums = albums
         .filter(a =>
