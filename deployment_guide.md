@@ -80,6 +80,19 @@ To update the app:
 
 ## Configuration
 
+### Spotify Configuration (Required for Spotify Login)
+To enable Spotify login, you must set the following environment variables in your TrueNAS App configuration (or `docker-compose.yml`):
+
+-   `SPOTIFY_CLIENT_ID`: Your Spotify App Client ID.
+-   `SPOTIFY_CLIENT_SECRET`: Your Spotify App Client Secret.
+-   `SPOTIFY_REDIRECT_URI`: The URL where Spotify redirects after login.
+    -   Format: `http://<your-server-ip>:8000/api/callback/spotify`
+    -   **Important**: You must also add this exact URL to the "Redirect URIs" in your Spotify Developer Dashboard.
+-   `FRONTEND_URL`: The URL of your frontend application.
+    -   Format: `http://<your-server-ip>` (or whatever port/domain you use).
+    -   This is where the backend will redirect the user after successful Spotify login.
+
+### Other Configuration
 - **Database**: The SQLite database is stored in the mapped volume. Back up your TrueNAS dataset to save your data.
 - **Ports**:
     - Frontend: Port `80` inside container. You may need to map this to a different port (e.g., `9080`) if port 80 is in use by TrueNAS.

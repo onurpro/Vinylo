@@ -7,7 +7,9 @@ services:
       - ./data:/app/data
     environment:
       - DATABASE_URL=sqlite:///./data/sql_app.db
-    command: sh -c "mkdir -p data && uvicorn main:app --host 0.0.0.0 --port 8000"
+      - FRONTEND_URL=http://localhost:5173 # Change this in production
+      - ALLOWED_ORIGINS=*
+      - SPOTIFY_REDIRECT_URI=http://localhost:8000/api/callback/spotify # Change this in production
 
   frontend:
     image: myusername/vinylo-frontend:latest
