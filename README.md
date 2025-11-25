@@ -82,6 +82,21 @@ You need to run both the backend and frontend servers.
 
 4.  Start ranking!
 
+## Deployment
+
+This project supports Docker deployment, making it easy to run on home servers (like TrueNAS) or cloud providers.
+
+1.  **Build and Run**:
+    ```bash
+    docker-compose up -d --build
+    ```
+
+2.  **Access**:
+    - Frontend: `http://localhost`
+    - Backend API: `http://localhost/api`
+
+For detailed instructions, see [deployment_guide.md](deployment_guide.md).
+
 ## Project Structure
 
 -   `backend/`: FastAPI backend source code.

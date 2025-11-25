@@ -219,6 +219,7 @@ yarn-error.log*
 # Data files
 *.db
 *_data.json
+data/
 
 # OS
 .DS_Store
