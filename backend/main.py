@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from . import models, schemas, database, elo_ranker, api_client
+import models, schemas, database, elo_ranker, api_client
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
