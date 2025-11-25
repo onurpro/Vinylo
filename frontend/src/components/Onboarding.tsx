@@ -74,9 +74,16 @@ export default function Onboarding() {
                             )}
 
                             <button
-                                onClick={() => {
-                                    setIsLoading(true);
-                                    window.location.href = `${API_BASE_URL}/api/login/lastfm`;
+                                onClick={async () => {
+                                    try {
+                                        setIsLoading(true);
+                                        const res = await axios.get(`${API_BASE_URL}/api/login/lastfm`);
+                                        window.location.href = res.data.url;
+                                    } catch (err) {
+                                        console.error(err);
+                                        setError('Failed to initialize Last.fm login.');
+                                        setIsLoading(false);
+                                    }
                                 }}
                                 disabled={isLoading}
                                 className="w-full bg-[#b90000] text-white text-xl font-black rounded-xl py-5 px-6 flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_black] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_black] active:translate-x-0 active:translate-y-0 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"

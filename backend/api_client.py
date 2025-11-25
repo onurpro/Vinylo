@@ -90,7 +90,7 @@ def get_lastfm_auth_url() -> str:
     Returns the URL to redirect the user to for Last.fm authorization.
     """
     if not LASTFM_API_KEY:
-        raise Exception("LASTFM_API_KEY (LASTFM_API_KEY) not set in environment variables.")
+        raise Exception("LASTFM_API_KEY not set in environment variables.")
     
     # Last.fm doesn't strictly require a redirect_uri in the auth URL for web apps 
     # if it's configured in the API account, but we can pass it as cb.
