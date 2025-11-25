@@ -1,20 +1,16 @@
 services:
   backend:
-    build: ./backend
+    image: myusername/vinylo-backend:latest
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data
     environment:
       - DATABASE_URL=sqlite:///./data/sql_app.db
-    # Ensure data directory exists before starting (optional, but good practice)
-    # command: sh -c "mkdir -p data && uvicorn main:app --host 0.0.0.0 --port 8000"
-    # Actually, uvicorn command is in Dockerfile. We can override it or just rely on python to create the file.
-    # But sqlite needs the directory to exist.
     command: sh -c "mkdir -p data && uvicorn main:app --host 0.0.0.0 --port 8000"
 
   frontend:
-    build: ./frontend
+    image: myusername/vinylo-frontend:latest
     ports:
       - "80:80"
     depends_on:

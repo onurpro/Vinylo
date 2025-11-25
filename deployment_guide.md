@@ -41,32 +41,52 @@ This command will:
 - **Frontend**: Open `http://<your-server-ip>` in your browser.
 - **Backend API**: Accessible at `http://<your-server-ip>/api` (proxied by Nginx).
 
-## TrueNAS Scale Specifics
+## TrueNAS Scale Deployment (Custom App)
 
-If you are using TrueNAS Scale, you have a few options:
+TrueNAS Scale's "Custom App" feature works best with pre-built images rather than building from source.
 
-### Option A: "Custom App" (Docker Compose)
-Recent versions of TrueNAS Scale support Docker Compose natively or via "Custom App".
-1.  Create a new "Custom App".
-2.  Paste the contents of `docker-compose.yml` into the configuration.
-3.  **Important**: You may need to adjust the volume mappings. The default `./data:/app/data` assumes a relative path. In TrueNAS, you should map a Host Path to `/app/data` to ensure data persists across updates.
+### 1. Build and Push Images (Local Machine)
+Before deploying on TrueNAS, you must build the Docker images on your computer and push them to Docker Hub.
 
-### Option B: Jail / VM
-If you run a Linux VM or Jail, simply follow the standard Docker Compose steps above.
+1.  **Edit Configuration**:
+    - Open `docker-compose.yml` and `build_and_push.sh`.
+    - Replace `myusername` with your actual Docker Hub username.
+
+2.  **Run Build Script**:
+    ```bash
+    ./build_and_push.sh
+    ```
+    This will build `vinylo-backend` and `vinylo-frontend` and push them to your Docker Hub account.
+
+### 2. Install on TrueNAS Scale
+1.  **Open Apps**: Go to the "Apps" tab in TrueNAS Scale.
+2.  **Discover Apps**: Click "Discover Apps" -> "Custom App".
+3.  **Install via YAML**:
+    - Give the app a name (e.g., `vinylo`).
+    - In the "Image" or "Configuration" section, look for an option to "Install via YAML" or paste a Compose file.
+    - Paste the contents of your updated `docker-compose.yml`.
+4.  **Configure Storage (Crucial)**:
+    - The `docker-compose.yml` defines a volume: `./data:/app/data`.
+    - TrueNAS might ask you to map this explicitly.
+    - **Host Path**: Choose a dataset on your TrueNAS pool (e.g., `/mnt/tank/apps/vinylo/data`).
+    - **Mount Path**: `/app/data`
+    - **Permissions**: Ensure the "apps" user (usually UID 568) has write access to this dataset, or configure the container to run as root (less secure, but easier).
+5.  **Deploy**: Click Install/Save.
+
+### 3. Updates
+To update the app:
+1.  Run `./build_and_push.sh` on your local machine.
+2.  On TrueNAS, go to the App details and click "Update" or "Pull Images" (depending on the UI version) to fetch the latest `latest` tag.
 
 ## Configuration
 
-- **Database**: The SQLite database is stored in the `./data` directory. Back up this directory to save your data.
+- **Database**: The SQLite database is stored in the mapped volume. Back up your TrueNAS dataset to save your data.
 - **Ports**:
-    - Frontend: Port `80` inside container, mapped to host port `80`.
-    - Backend: Port `8000` inside container, mapped to host port `8000`.
-    - To change the host port, edit `docker-compose.yml`:
-      ```yaml
-      ports:
-        - "8080:80" # Maps host 8080 to container 80
-      ```
+    - Frontend: Port `80` inside container. You may need to map this to a different port (e.g., `9080`) if port 80 is in use by TrueNAS.
+    - Backend: Port `8000` inside container.
 
 ## Troubleshooting
 
-- **"Connection Refused"**: Ensure the containers are running with `docker-compose ps`.
-- **Data not saving**: Check permissions on the `data` directory. Docker needs write access.
+- **"Connection Refused"**: Ensure the containers are running. Check TrueNAS App logs.
+- **Data not saving**: Check permissions on the TrueNAS dataset mapped to `/app/data`.
+- **Images not found**: Ensure you have successfully pushed images to Docker Hub and the repository is Public (or you have configured image pull secrets).
