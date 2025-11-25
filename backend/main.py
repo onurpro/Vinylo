@@ -20,6 +20,7 @@ origins = [
     "http://localhost:5173", # Vite default
     "http://localhost:3000",
     "http://127.0.0.1:5173",
+    "*" # Allow all for now to fix connection issues on TrueNAS
 ]
 
 app.add_middleware(
@@ -142,9 +143,7 @@ def callback_spotify(code: str, db: Session = Depends(get_db)):
             print(f"DEBUG: Inserted {len(albums_data)} albums into DB")
             
         # Redirect to frontend with username
-        # Assuming frontend is on localhost:5173 (Vite default) or 3000
-        # We can make this configurable too, but for now hardcode to localhost:5173
-        frontend_url = "http://localhost:5173"
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
         return RedirectResponse(url=f"{frontend_url}?username={username}")
         
     except Exception as e:
