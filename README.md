@@ -1,115 +1,50 @@
 # Vinylo
 
-Vinylo is a web-based application that allows you to rank your Last.fm albums using an ELO rating system. It fetches your top albums from Last.fm and presents them in 1v1 matchups, letting you decide which one you prefer. Over time, this builds a personalized ranking of your music library.
+**Your Personal Music Ranker**
+
+Vinylo helps you discover your true music preferences by pitting your favorite albums against each other. Using your listening history from Last.fm or Spotify, it creates 1v1 matchups where you decide the winner. Over time, this builds a highly accurate, personalized ranking of your music library.
 
 ## Features
 
--   **Last.fm & Spotify Integration**: Automatically fetches your top albums from your Last.fm profile or Spotify top tracks.
--   **ELO Rating System**: Uses a robust ELO algorithm to calculate album rankings based on your choices.
--   **Interactive Play Mode**: 1v1 matchups with album art, artist names, and current scores.
--   **Smart Filtering**: Automatically filters out "clutter" such as singles, EPs, and albums with low playcounts (< 10).
--   **Ignore Feature**: Manually ignore albums you don't want to rank.
--   **Scoreboard**: View your top 50 ranked albums in a beautiful leaderboard.
--   **Persistence**: Automatically saves your progress and rankings locally.
+-   **Connect Your Music**: Seamlessly integrates with your Last.fm or Spotify account to fetch your top albums.
+-   **1v1 Battles**: Simple "this or that" choices make ranking fun and easy.
+-   **Smart Ranking**: Uses an advanced ELO rating system (like in chess) to calculate scores based on your decisions.
+-   **Clean Up**: Automatically filters out singles and albums you rarely listen to, so you focus on what matters.
+-   **Leaderboard**: Watch your favorite albums climb the ranks on your personal scoreboard.
 
-## Prerequisites
+## How to Use
 
--   Python 3.x
--   Node.js & npm
--   A Last.fm API Key (Get one [here](https://www.last.fm/api/account/create))
--   A Spotify App Client ID & Secret (Get one [here](https://developer.spotify.com/dashboard))
+### 1. Get Started
+When you first launch Vinylo, you'll be asked to connect your music account.
+-   **Last.fm Users**: Enter your username to fetch your top albums.
 
-## Installation
+### 2. Start Ranking
+Once your albums are loaded, the fun begins! You'll see two albums side-by-side.
+-   Click on the album you prefer.
+-   The winner gains points, and the loser loses points.
+-   A new matchup will appear instantly.
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/AlbumELO.git
-    cd AlbumELO
-    ```
+### 3. View Your Stats
+Curious about your top 10?
+-   Click the **Leaderboard** button in the main menu.
+-   See your albums ranked from #1 to #50 based on your matchup decisions.
 
-### Backend Setup
+### 4. Settings & Reset
+-   **Ignore Albums**: If an album appears that you don't want to rank (like a comedy album or a soundtrack), you can "Ignore" it, and it won't show up in matchups again.
+-   **Reset**: Want to start over? You can reset your rankings in the Settings menu.
 
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
+## Support & Feedback
 
-2.  Install Python dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+Found a bug? Have a great idea for a new feature? We'd love to hear from you!
 
-3.  Create a `.env` file in the **root** directory (not backend) and add your keys:
-    ```env
-    LASTFM_API_KEY=your_lastfm_api_key_here
-    
-    SPOTIFY_CLIENT_ID=your_spotify_client_id
-    SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-    SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/api/callback/spotify
-    ```
-    *Note: Ensure your Spotify App Redirect URI in the dashboard matches `http://127.0.0.1:8000/api/callback/spotify` exactly.*
+-   **Report a Bug**: If something isn't working right, please [open an issue](https://github.com/yourusername/AlbumELO/issues) on GitHub.
+-   **Request a Feature**: Have an idea to make Vinylo better? [Let us know!](https://github.com/yourusername/AlbumELO/issues)
 
-### Frontend Setup
+---
 
-1.  Navigate to the frontend directory:
-    ```bash
-    cd ../frontend
-    ```
+### For Developers & Self-Hosters
 
-2.  Install Node dependencies:
-    ```bash
-    npm install
-    ```
+If you are a developer looking to contribute or want to host Vinylo on your own server (like TrueNAS):
 
-## Usage
-
-You need to run both the backend and frontend servers.
-
-1.  **Start the Backend**:
-    From the root directory:
-    ```bash
-    uvicorn backend.main:app --reload --port 8000
-    ```
-
-2.  **Start the Frontend**:
-    From the `frontend` directory:
-    ```bash
-    npm run dev
-    ```
-
-3.  Open your web browser and navigate to:
-    `http://localhost:5173`
-
-4.  Start ranking!
-
-## Deployment
-
-This project supports Docker deployment, making it easy to run on home servers (like TrueNAS) or cloud providers.
-
-1.  **Build and Run**:
-    ```bash
-    docker-compose up -d --build
-    ```
-
-2.  **Access**:
-    - Frontend: `http://localhost`
-    - Backend API: `http://localhost/api`
-
-For detailed instructions, see [deployment_guide.md](deployment_guide.md).
-
-## Project Structure
-
--   `backend/`: FastAPI backend source code.
-    -   `main.py`: FastAPI app and route definitions.
-    -   `models.py`: Data models.
-    -   `api_client.py`: Last.fm API integration.
-    -   `elo_ranker.py`: ELO calculation logic.
-    -   `database.py`: Database connection.
--   `frontend/`: React frontend source code.
-    -   `src/`: React components and logic.
-    -   `public/`: Static assets.
--   `requirements.txt`: Python dependencies (legacy root file removed, see `backend/requirements.txt`).
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+-   **Contribution Guide**: See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup.
+-   **Deployment Guide**: See [deployment_guide.md](deployment_guide.md) for Docker and server deployment instructions.

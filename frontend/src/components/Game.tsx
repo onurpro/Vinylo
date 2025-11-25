@@ -213,6 +213,14 @@ export default function Game({ username, source }: GameProps) {
                 </div>
             )}
 
+            {/* Spotify Attribution */}
+            {source === 'spotify' && (
+                <div className="absolute bottom-4 flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                    <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Black.png" alt="Spotify" className="h-6" />
+                    <span className="text-xs font-medium text-black">Content from Spotify</span>
+                </div>
+            )}
+
         </div>
     )
 }

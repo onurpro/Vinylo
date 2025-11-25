@@ -26,3 +26,16 @@ class VoteRequest(BaseModel):
     album1_id: int
     album2_id: int
     winner: str # "1" or "2"
+
+class UserSettingsBase(BaseModel):
+    scrobble_threshold: int = 0
+
+class UserSettingsCreate(UserSettingsBase):
+    pass
+
+class UserSettings(UserSettingsBase):
+    username: str
+    source: str
+
+    class Config:
+        orm_mode = True

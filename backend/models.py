@@ -29,3 +29,10 @@ class Album(Base):
             "eloScore": self.elo_score,
             "ignored": self.ignored
         }
+
+class UserSettings(Base):
+    __tablename__ = "user_settings"
+
+    username = Column(String, primary_key=True, index=True)
+    source = Column(String, primary_key=True, index=True)
+    scrobble_threshold = Column(Integer, default=0)

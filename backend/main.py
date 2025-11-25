@@ -198,16 +198,63 @@ def callback_spotify(code: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/settings/{username}", response_model=schemas.UserSettings)
+def get_settings(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+    settings = db.query(models.UserSettings).filter(
+        models.UserSettings.username == username,
+        models.UserSettings.source == source
+    ).first()
+    
+    if not settings:
+        # Return default settings
+        return schemas.UserSettings(username=username, source=source, scrobble_threshold=0)
+    
+    return settings
+
+@app.post("/api/settings/{username}", response_model=schemas.UserSettings)
+def update_settings(username: str, settings: schemas.UserSettingsCreate, source: str = "lastfm", db: Session = Depends(get_db)):
+    db_settings = db.query(models.UserSettings).filter(
+        models.UserSettings.username == username,
+        models.UserSettings.source == source
+    ).first()
+    
+    if not db_settings:
+        db_settings = models.UserSettings(
+            username=username, 
+            source=source, 
+            scrobble_threshold=settings.scrobble_threshold
+        )
+        db.add(db_settings)
+    else:
+        db_settings.scrobble_threshold = settings.scrobble_threshold
+        
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings
+
 @app.get("/api/matchup/{username}", response_model=List[schemas.Album])
 def get_matchup(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
     # Filter active albums
     # Logic: playcount >= 50, not ignored, no "EP"/"Single" in title (simplified for now)
     # We can make these filters configurable later
     
+    # Get user settings for threshold
+    settings = db.query(models.UserSettings).filter(
+        models.UserSettings.username == username,
+        models.UserSettings.source == source
+    ).first()
+    
+    # Force threshold to 0 for Spotify since playcounts are 0
+    if source == "spotify":
+        threshold = 0
+    else:
+        threshold = settings.scrobble_threshold if settings else 0
+    
     query = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source,
-        models.Album.ignored == False
+        models.Album.ignored == False,
+        models.Album.playcount >= threshold
     )
     
     # Simple exclusion of EPs/Singles
@@ -254,10 +301,23 @@ def vote(vote_req: schemas.VoteRequest, db: Session = Depends(get_db)):
 
 @app.get("/api/stats/{username}", response_model=List[schemas.Album])
 def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+    # Get user settings for threshold
+    settings = db.query(models.UserSettings).filter(
+        models.UserSettings.username == username,
+        models.UserSettings.source == source
+    ).first()
+    
+    # Force threshold to 0 for Spotify since playcounts are 0
+    if source == "spotify":
+        threshold = 0
+    else:
+        threshold = settings.scrobble_threshold if settings else 0
+
     albums = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source,
-        models.Album.ignored == False
+        models.Album.ignored == False,
+        models.Album.playcount >= threshold
     ).order_by(models.Album.elo_score.desc()).all()
     return albums
 

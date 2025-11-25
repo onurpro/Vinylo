@@ -10,7 +10,7 @@ This guide explains how to deploy the AlbumELO application using Docker and Dock
 ## Project Structure
 
 The deployment relies on the following files:
-- `docker-compose.yml`: Orchestrates the Backend and Frontend services.
+- `docker-compose.prod.yml`: Orchestrates the Backend and Frontend services (Production).
 - `backend/Dockerfile`: Builds the Python FastAPI backend.
 - `frontend/Dockerfile`: Builds the React frontend and serves it with Nginx.
 - `frontend/nginx.conf`: Configures Nginx to serve the app and proxy API requests.
@@ -29,7 +29,7 @@ Navigate to the directory and start the services:
 
 ```bash
 cd AlbumELO
-docker-compose up -d --build
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 This command will:
@@ -49,7 +49,7 @@ TrueNAS Scale's "Custom App" feature works best with pre-built images rather tha
 Before deploying on TrueNAS, you must build the Docker images on your computer and push them to Docker Hub.
 
 1.  **Edit Configuration**:
-    - Open `docker-compose.yml` and `build_and_push.sh`.
+    - Open `docker-compose.prod.yml` and `build_and_push.sh`.
     - Replace `myusername` with your actual Docker Hub username.
 
 2.  **Run Build Script**:
@@ -64,9 +64,9 @@ Before deploying on TrueNAS, you must build the Docker images on your computer a
 3.  **Install via YAML**:
     - Give the app a name (e.g., `vinylo`).
     - In the "Image" or "Configuration" section, look for an option to "Install via YAML" or paste a Compose file.
-    - Paste the contents of your updated `docker-compose.yml`.
+    - Paste the contents of your updated `docker-compose.prod.yml`.
 4.  **Configure Storage (Crucial)**:
-    - The `docker-compose.yml` defines a volume: `./data:/app/data`.
+    - The `docker-compose.prod.yml` defines a volume: `./data:/app/data`.
     - TrueNAS might ask you to map this explicitly.
     - **Host Path**: Choose a dataset on your TrueNAS pool (e.g., `/mnt/tank/apps/vinylo/data`).
     - **Mount Path**: `/app/data`
@@ -81,7 +81,7 @@ To update the app:
 ## Configuration
 
 ### Spotify Configuration (Required for Spotify Login)
-To enable Spotify login, you must set the following environment variables in your TrueNAS App configuration (or `docker-compose.yml`):
+To enable Spotify login, you must set the following environment variables in your TrueNAS App configuration (or `docker-compose.prod.yml`):
 
 -   `SPOTIFY_CLIENT_ID`: Your Spotify App Client ID.
 -   `SPOTIFY_CLIENT_SECRET`: Your Spotify App Client Secret.
