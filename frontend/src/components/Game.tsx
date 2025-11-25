@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, TrendingUp, Ban, Share2 } from 'lucide-react'
+import { Loader2, TrendingUp, Ban, Share2, HelpCircle } from 'lucide-react'
 import { toPng } from 'html-to-image'
 import type { Album } from '../types'
 
 import ShareModal from './ShareModal'
+import TutorialModal from './TutorialModal'
 
 interface GameProps {
     username: string
@@ -16,6 +17,7 @@ export default function Game({ username }: GameProps) {
     const [loading, setLoading] = useState(true)
     const [voting, setVoting] = useState(false)
     const [showShareModal, setShowShareModal] = useState(false)
+    const [showTutorial, setShowTutorial] = useState(false)
     const [capturedImage, setCapturedImage] = useState<string | null>(null)
     const captureRef = useRef<HTMLDivElement>(null)
 
@@ -34,6 +36,14 @@ export default function Game({ username }: GameProps) {
     useEffect(() => {
         fetchMatchup()
     }, [username])
+
+    useEffect(() => {
+        const tutorialSeen = localStorage.getItem('album_elo_tutorial_seen')
+        if (!tutorialSeen) {
+            setShowTutorial(true)
+            localStorage.setItem('album_elo_tutorial_seen', 'true')
+        }
+    }, [])
 
     const handleVote = async (winnerIndex: number) => {
         if (voting || matchup.length < 2) return
@@ -81,7 +91,7 @@ export default function Game({ username }: GameProps) {
             try {
                 // Create a temporary clone to add branding if needed later
                 // For now, just capture the current ref
-                const dataUrl = await toPng(captureRef.current, { cacheBust: true, pixelRatio: 2 })
+                const dataUrl = await toPng(captureRef.current, { cacheBust: true, pixelRatio: 2, backgroundColor: '#ffffff' })
                 setCapturedImage(dataUrl)
                 setShowShareModal(true)
             } catch (err) {
@@ -102,7 +112,16 @@ export default function Game({ username }: GameProps) {
     if (matchup.length < 2) return null
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8">
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 relative">
+
+            {/* Tutorial Button */}
+            <button
+                onClick={() => setShowTutorial(true)}
+                className="absolute top-6 right-6 z-40 p-2 bg-white border-2 border-black rounded-full text-black hover:bg-yellow-400 transition-colors shadow-[4px_4px_0px_black] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_black] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                title="How to Play"
+            >
+                <HelpCircle size={24} />
+            </button>
 
             {/* Capture Area */}
             <div ref={captureRef} className="relative flex flex-col md:flex-row items-center justify-center gap-12 md:gap-32 p-8 rounded-3xl bg-transparent">
@@ -150,6 +169,13 @@ export default function Game({ username }: GameProps) {
                     onClose={() => setShowShareModal(false)}
                 />
             )}
+
+            {/* Tutorial Modal */}
+            <AnimatePresence>
+                {showTutorial && (
+                    <TutorialModal onClose={() => setShowTutorial(false)} />
+                )}
+            </AnimatePresence>
 
             {/* Ignore Confirmation Modal */}
             {ignoreId && (

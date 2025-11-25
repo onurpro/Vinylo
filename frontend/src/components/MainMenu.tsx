@@ -21,7 +21,7 @@ export default function MainMenu({ username, onPlay, onStats, onIgnored, onSetti
             >
                 <img src={logo} alt="Vinylo Logo" className="w-24 h-24" />
                 <h1 className="text-6xl md:text-8xl font-black text-black mb-2 tracking-tighter uppercase">
-                    Album<span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 text-stroke-black">ELO</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 text-stroke-black">Vinylo</span>
                 </h1>
                 <p className="text-xl font-bold text-gray-500 mb-8">
                     Logged in as: <span className="text-black">{username}</span>

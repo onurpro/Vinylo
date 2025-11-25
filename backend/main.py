@@ -96,7 +96,23 @@ def reset_user_data(username: str, db: Session = Depends(get_db)):
     # Delete all albums for the user
     count = db.query(models.Album).filter(models.Album.username == username).delete()
     db.commit()
-    return {"message": f"Deleted {count} albums for user {username}", "deleted_count": count}
+
+    # Delete legacy JSON file if it exists
+    json_path = f"{username}_data.json"
+    file_deleted = False
+    if os.path.exists(json_path):
+        try:
+            os.remove(json_path)
+            file_deleted = True
+            print(f"Deleted legacy data file: {json_path}")
+        except Exception as e:
+            print(f"Failed to delete legacy data file {json_path}: {e}")
+
+    return {
+        "message": f"Deleted {count} albums for user {username}", 
+        "deleted_count": count,
+        "legacy_file_deleted": file_deleted
+    }
 
 @app.get("/api/login/spotify")
 def login_spotify():
