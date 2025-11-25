@@ -1,10 +1,10 @@
 services:
   backend:
-    image: myusername/vinylo-backend:latest
+    image: onurpro/vinylo-backend:latest
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - /mnt/pool/vinylo-data:/app/data
     environment:
       - DATABASE_URL=sqlite:///./data/sql_app.db
       - FRONTEND_URL=http://localhost:5173 # Change this in production
@@ -12,8 +12,8 @@ services:
       - SPOTIFY_REDIRECT_URI=http://localhost:8000/api/callback/spotify # Change this in production
 
   frontend:
-    image: myusername/vinylo-frontend:latest
+    image: onurpro/vinylo-frontend:latest
     ports:
-      - "80:80"
+      - "9080:80"
     depends_on:
       - backend
