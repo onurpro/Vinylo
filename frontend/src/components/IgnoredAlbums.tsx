@@ -72,7 +72,7 @@ export default function IgnoredAlbums({ username, source, onBack }: IgnoredAlbum
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="flex items-center gap-6 p-4 bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all group"
+                            className="flex items-center gap-4 md:gap-6 p-4 bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all group"
                         >
                             {/* Cover */}
                             <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-black flex-shrink-0 relative">

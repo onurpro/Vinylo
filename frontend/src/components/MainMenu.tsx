@@ -20,8 +20,8 @@ export default function MainMenu({ username, source, onPlay, onStats, onIgnored,
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center mb-12 flex flex-col items-center gap-4"
             >
-                <img src={logo} alt="Vinylo Logo" className="w-24 h-24" />
-                <h1 className="text-6xl md:text-8xl font-black text-black mb-2 tracking-tighter uppercase">
+                <img src={logo} alt="Vinylo Logo" className="w-20 h-20 md:w-24 md:h-24" />
+                <h1 className="text-5xl md:text-8xl font-black text-black mb-2 tracking-tighter uppercase">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 text-stroke-black">Vinylo</span>
                 </h1>
                 <p className="text-xl font-bold text-gray-500 mb-8 flex items-center gap-2 justify-center">

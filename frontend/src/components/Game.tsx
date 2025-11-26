@@ -135,7 +135,7 @@ export default function Game({ username, source }: GameProps) {
             </button>
 
             {/* Capture Area */}
-            <div ref={captureRef} className="relative flex flex-col md:flex-row items-center justify-center gap-12 md:gap-32 p-8 rounded-3xl bg-transparent">
+            <div ref={captureRef} className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-32 p-4 md:p-8 rounded-3xl bg-transparent w-full max-w-6xl">
 
                 {/* VS Badge */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
@@ -294,17 +294,17 @@ function AlbumCard({ album, index, onVote, onIgnore, disabled }: { album: Album,
 
     return (
         <motion.div
-            className="relative group cursor-pointer w-[350px] h-[500px] flex-shrink-0"
+            className="relative group cursor-pointer w-full max-w-[350px] aspect-[350/500] md:h-[500px] flex-shrink-0"
             onClick={!disabled ? onVote : undefined}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
         >
-            <div className="w-full h-full bg-white border-2 border-black rounded-[20px] shadow-[8px_8px_0px_rgba(0,0,0,0.1)] group-hover:-translate-y-1 group-hover:shadow-[12px_12px_0px_rgba(0,0,0,0.1)] transition-all duration-300 overflow-hidden flex flex-col items-center p-[30px] text-center relative">
+            <div className="w-full h-full bg-white border-2 border-black rounded-[20px] shadow-[8px_8px_0px_rgba(0,0,0,0.1)] group-hover:-translate-y-1 group-hover:shadow-[12px_12px_0px_rgba(0,0,0,0.1)] transition-all duration-300 overflow-hidden flex flex-col items-center p-4 md:p-[30px] text-center relative">
 
                 {/* Image Section */}
-                <div className="w-[250px] h-[250px] mb-[25px] relative shrink-0">
+                <div className="w-full aspect-square max-w-[250px] mb-[25px] relative shrink-0">
                     {!imgError ? (
                         <img
                             src={album.image_url || 'placeholder'}

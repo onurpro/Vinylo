@@ -49,7 +49,7 @@ export default function Stats({ username, source, onBack }: StatsProps) {
     }
 
     return (
-        <div className="w-full h-full flex flex-col p-8 max-w-5xl mx-auto">
+        <div className="w-full h-full flex flex-col p-4 md:p-8 max-w-5xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <button
@@ -64,7 +64,7 @@ export default function Stats({ username, source, onBack }: StatsProps) {
             </div>
 
             {/* Controls */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <input
                     type="text"
                     placeholder="Search albums or artists..."
@@ -130,7 +130,7 @@ function StatsRow({ album, rank }: { album: Album, rank: number }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: rank * 0.05 }}
-            className={`flex items-center gap-6 p-4 bg-white rounded-xl border-2 ${borderColor} shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all group`}
+            className={`flex items-center gap-3 md:gap-6 p-3 md:p-4 bg-white rounded-xl border-2 ${borderColor} shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all group`}
         >
             {/* Rank */}
             <div className={`w-12 text-3xl font-black text-center ${rankColor}`}>
