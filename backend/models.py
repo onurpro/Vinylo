@@ -35,4 +35,4 @@ class UserSettings(Base):
 
     username = Column(String, primary_key=True, index=True)
     source = Column(String, primary_key=True, index=True)
-    scrobble_threshold = Column(Integer, default=0)
+    scrobble_threshold = Column(Integer, default=50)

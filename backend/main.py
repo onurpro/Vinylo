@@ -207,7 +207,7 @@ def get_settings(username: str, source: str = "lastfm", db: Session = Depends(ge
     
     if not settings:
         # Return default settings
-        return schemas.UserSettings(username=username, source=source, scrobble_threshold=0)
+        return schemas.UserSettings(username=username, source=source, scrobble_threshold=50)
     
     return settings
 
@@ -248,7 +248,7 @@ def get_matchup(username: str, source: str = "lastfm", db: Session = Depends(get
     if source == "spotify":
         threshold = 0
     else:
-        threshold = settings.scrobble_threshold if settings else 0
+        threshold = settings.scrobble_threshold if settings else 50
     
     query = db.query(models.Album).filter(
         models.Album.username == username,
@@ -311,7 +311,7 @@ def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_d
     if source == "spotify":
         threshold = 0
     else:
-        threshold = settings.scrobble_threshold if settings else 0
+        threshold = settings.scrobble_threshold if settings else 50
 
     albums = db.query(models.Album).filter(
         models.Album.username == username,

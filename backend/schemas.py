@@ -28,7 +28,7 @@ class VoteRequest(BaseModel):
     winner: str # "1" or "2"
 
 class UserSettingsBase(BaseModel):
-    scrobble_threshold: int = 0
+    scrobble_threshold: int = 50
 
 class UserSettingsCreate(UserSettingsBase):
     pass
