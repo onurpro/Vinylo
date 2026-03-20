@@ -9,7 +9,6 @@ import Settings from './components/Settings'
 
 function App() {
   const [username, setUsername] = useState<string | null>(null)
-  const [source, setSource] = useState<string>('lastfm')
   const [view, setView] = useState<'menu' | 'game' | 'stats' | 'ignored' | 'settings'>('menu')
 
   useEffect(() => {
@@ -20,36 +19,31 @@ function App() {
         const parsed = JSON.parse(storedUser)
         if (typeof parsed === 'object' && parsed.username) {
           setUsername(parsed.username)
-          setSource(parsed.source || 'lastfm')
         } else {
           // Legacy string support
           setUsername(storedUser)
-          setSource('lastfm')
         }
       } catch (e) {
         // Legacy string support
         setUsername(storedUser)
-        setSource('lastfm')
       }
     }
 
-    // Check for login redirect (Spotify or Last.fm)
+    // Check for login redirect
     const params = new URLSearchParams(window.location.search)
     const urlUsername = params.get('username')
-    const urlSource = params.get('source')
     if (urlUsername) {
       // Force logout first to clear any old session
       localStorage.removeItem('album_elo_user')
-      handleLogin(urlUsername, urlSource || 'spotify')
+      handleLogin(urlUsername)
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
 
-  const handleLogin = (user: string, src: string = 'lastfm') => {
+  const handleLogin = (user: string) => {
     setUsername(user)
-    setSource(src)
-    localStorage.setItem('album_elo_user', JSON.stringify({ username: user, source: src }))
+    localStorage.setItem('album_elo_user', JSON.stringify({ username: user }))
     setView('menu')
   }
 
@@ -86,7 +80,6 @@ function App() {
                 >
                   <MainMenu
                     username={username}
-                    source={source}
                     onPlay={() => setView('game')}
                     onStats={() => setView('stats')}
                     onIgnored={() => setView('ignored')}
@@ -110,7 +103,7 @@ function App() {
                   >
                     BACK
                   </button>
-                  <Game username={username} source={source} />
+                  <Game username={username} />
                 </motion.div>
               )}
 
@@ -122,7 +115,7 @@ function App() {
                   exit={{ opacity: 0 }}
                   className="w-full h-screen absolute inset-0"
                 >
-                  <Stats username={username} source={source} onBack={() => setView('menu')} />
+                  <Stats username={username} onBack={() => setView('menu')} />
                 </motion.div>
               )}
 
@@ -134,7 +127,7 @@ function App() {
                   exit={{ opacity: 0 }}
                   className="w-full h-screen absolute inset-0"
                 >
-                  <IgnoredAlbums username={username} source={source} onBack={() => setView('menu')} />
+                  <IgnoredAlbums username={username} onBack={() => setView('menu')} />
                 </motion.div>
               )}
 
@@ -148,7 +141,6 @@ function App() {
                 >
                   <Settings
                     username={username}
-                    source={source}
                     onBack={() => setView('menu')}
                     onReset={handleLogout}
                   />

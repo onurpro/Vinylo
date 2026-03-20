@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Trash2, ArrowLeft, AlertTriangle, Save, Music } from 'lucide-react'
+import { Trash2, ArrowLeft, AlertTriangle, Save, Music, RefreshCw } from 'lucide-react'
 import { API_BASE_URL } from '../config'
 
 interface SettingsProps {
     username: string
-    source: string
     onBack: () => void
     onReset: () => void
 }
 
-export default function Settings({ username, source, onBack, onReset }: SettingsProps) {
+export default function Settings({ username, onBack, onReset }: SettingsProps) {
     const [confirming, setConfirming] = useState(false)
     const [loading, setLoading] = useState(false)
     const [scrobbleThreshold, setScrobbleThreshold] = useState(0)
     const [savingSettings, setSavingSettings] = useState(false)
     const [settingsMessage, setSettingsMessage] = useState('')
+    const [rescanning, setRescanning] = useState(false)
+    const [rescanMessage, setRescanMessage] = useState('')
 
     useEffect(() => {
         fetchSettings()
-    }, [username, source])
+    }, [username])
 
     const fetchSettings = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/settings/${username}?source=${source}`)
+            const response = await fetch(`${API_BASE_URL}/api/settings/${username}`)
             if (response.ok) {
                 const data = await response.json()
                 setScrobbleThreshold(data.scrobble_threshold)
@@ -37,7 +38,7 @@ export default function Settings({ username, source, onBack, onReset }: Settings
         setSavingSettings(true)
         setSettingsMessage('')
         try {
-            const response = await fetch(`${API_BASE_URL}/api/settings/${username}?source=${source}`, {
+            const response = await fetch(`${API_BASE_URL}/api/settings/${username}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ export default function Settings({ username, source, onBack, onReset }: Settings
 
         setLoading(true)
         try {
-            const response = await fetch(`${API_BASE_URL}/api/reset/${username}?source=${source}`, {
+            const response = await fetch(`${API_BASE_URL}/api/reset/${username}`, {
                 method: 'DELETE',
             })
 
@@ -84,6 +85,29 @@ export default function Settings({ username, source, onBack, onReset }: Settings
             console.error('Error resetting data:', error)
             setLoading(false)
             setConfirming(false)
+        }
+    }
+
+    const handleRescan = async () => {
+        setRescanning(true)
+        setRescanMessage('')
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/rescan/${username}`, {
+                method: 'POST',
+            })
+
+            if (response.ok) {
+                const data = await response.json()
+                setRescanMessage(data.message || 'Rescan complete!')
+                setTimeout(() => setRescanMessage(''), 5000)
+            } else {
+                setRescanMessage('Failed to rescan Last.fm data')
+            }
+        } catch (error) {
+            console.error('Error rescanning data:', error)
+            setRescanMessage('Error connecting to server')
+        } finally {
+            setRescanning(false)
         }
     }
 
@@ -112,38 +136,64 @@ export default function Settings({ username, source, onBack, onReset }: Settings
                             <h3 className="font-bold text-xl">Preferences</h3>
                         </div>
 
-                        {source !== 'spotify' && (
-                            <div className="space-y-2">
-                                <label className="block font-bold text-sm">
-                                    Minimum Scrobble Threshold
-                                </label>
-                                <p className="text-xs text-gray-500 mb-2">
-                                    Albums with fewer plays than this will be hidden from matchups and stats.
-                                </p>
-                                <div className="flex gap-4">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={scrobbleThreshold}
-                                        onChange={(e) => setScrobbleThreshold(Math.max(0, parseInt(e.target.value) || 0))}
-                                        className="flex-1 p-3 border-2 border-black rounded-xl font-bold focus:outline-none focus:shadow-[4px_4px_0px_black] transition-shadow"
-                                    />
-                                    <button
-                                        onClick={handleSaveSettings}
-                                        disabled={savingSettings}
-                                        className="bg-black text-white px-6 rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center gap-2"
-                                    >
-                                        <Save size={18} />
-                                        {savingSettings ? 'Saving...' : 'Save'}
-                                    </button>
-                                </div>
-                                {settingsMessage && (
-                                    <p className={`text-sm font-bold ${settingsMessage.includes('Failed') || settingsMessage.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-                                        {settingsMessage}
-                                    </p>
-                                )}
+                        <div className="space-y-2">
+                            <label className="block font-bold text-sm">
+                                Minimum Scrobble Threshold
+                            </label>
+                            <p className="text-xs text-gray-500 mb-2">
+                                Albums with fewer plays than this will be hidden from matchups and stats.
+                            </p>
+                            <div className="flex gap-4">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={scrobbleThreshold}
+                                    onChange={(e) => setScrobbleThreshold(Math.max(0, parseInt(e.target.value) || 0))}
+                                    className="flex-1 p-3 border-2 border-black rounded-xl font-bold focus:outline-none focus:shadow-[4px_4px_0px_black] transition-shadow"
+                                />
+                                <button
+                                    onClick={handleSaveSettings}
+                                    disabled={savingSettings}
+                                    className="bg-black text-white px-6 rounded-xl font-bold hover:bg-gray-800 transition-colors flex items-center gap-2"
+                                >
+                                    <Save size={18} />
+                                    {savingSettings ? 'Saving...' : 'Save'}
+                                </button>
                             </div>
-                        )}
+                            {settingsMessage && (
+                                <p className={`text-sm font-bold ${settingsMessage.includes('Failed') || settingsMessage.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+                                    {settingsMessage}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <hr className="border-black" />
+
+                    {/* Sync Data */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <RefreshCw size={20} />
+                            <h3 className="font-bold text-xl">Sync Data</h3>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Fetch your latest top albums from Last.fm. This will add new albums and update playcounts without overwriting your existing rankings.
+                            </p>
+                            <button
+                                onClick={handleRescan}
+                                disabled={rescanning}
+                                className="w-full flex items-center justify-center gap-2 bg-black text-white px-6 py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors"
+                            >
+                                <RefreshCw size={18} className={rescanning ? 'animate-spin' : ''} />
+                                {rescanning ? 'Rescanning...' : 'Rescan Last.fm'}
+                            </button>
+                            {rescanMessage && (
+                                <p className={`text-sm font-bold mt-2 text-center ${rescanMessage.includes('Failed') || rescanMessage.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+                                    {rescanMessage}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     <hr className="border-black" />

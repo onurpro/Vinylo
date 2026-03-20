@@ -122,6 +122,50 @@ def reset_user_data(username: str, source: str = "lastfm", db: Session = Depends
         "legacy_file_deleted": file_deleted
     }
 
+@app.post("/api/rescan/{username}")
+def rescan_user_data(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+    if source != "lastfm":
+        raise HTTPException(status_code=400, detail="Rescan only supported for Last.fm currently")
+        
+    print(f"Rescanning from Last.fm for {username}...")
+    albums_data = api_client.fetch_albums_from_lastfm(username)
+    if not albums_data:
+        raise HTTPException(status_code=404, detail="Could not fetch data from Last.fm")
+        
+    existing_albums = db.query(models.Album).filter(
+        models.Album.username == username,
+        models.Album.source == source
+    ).all()
+    
+    # Create a map of (name, artist_name) -> existing album object
+    existing_map = {(a.name, a.artist_name): a for a in existing_albums}
+    
+    added_count = 0
+    updated_count = 0
+    
+    for album_dict in albums_data:
+        key = (album_dict['name'], album_dict['artist_name'])
+        if key in existing_map:
+            # Update playcount / image
+            db_album = existing_map[key]
+            db_album.playcount = album_dict.get('playcount', db_album.playcount)
+            if album_dict.get('image_url'):
+                db_album.image_url = album_dict['image_url']
+            updated_count += 1
+        else:
+            # Insert new
+            db_album = models.Album(**album_dict)
+            db.add(db_album)
+            added_count += 1
+            
+    db.commit()
+    
+    return {
+        "message": f"Rescan complete. Added {added_count} new albums, updated {updated_count} existing albums.",
+        "added": added_count,
+        "updated": updated_count
+    }
+
 @app.get("/api/login/lastfm")
 def login_lastfm():
     try:
@@ -161,42 +205,6 @@ def callback_lastfm(token: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/login/spotify")
-def login_spotify():
-    try:
-        url = api_client.get_spotify_auth_url()
-        return {"url": url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/callback/spotify")
-def callback_spotify(code: str, db: Session = Depends(get_db)):
-    try:
-        token = api_client.get_spotify_token(code)
-        albums_data, username = api_client.fetch_albums_from_spotify(token)
-        print(f"DEBUG: Fetched {len(albums_data)} albums from Spotify for {username}")
-        
-        # Check if user already exists, if so, maybe update? 
-        # For now, similar logic to init: check count
-        count = db.query(models.Album).filter(
-            models.Album.username == username,
-            models.Album.source == "spotify"
-        ).count()
-        print(f"DEBUG: Current album count in DB for {username}: {count}")
-        
-        if count == 0:
-            for album_dict in albums_data:
-                db_album = models.Album(**album_dict)
-                db.add(db_album)
-            db.commit()
-            print(f"DEBUG: Inserted {len(albums_data)} albums into DB")
-            
-        # Redirect to frontend with username and source
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        return RedirectResponse(url=f"{frontend_url}?username={username}&source=spotify")
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/settings/{username}", response_model=schemas.UserSettings)
 def get_settings(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
@@ -244,11 +252,7 @@ def get_matchup(username: str, source: str = "lastfm", db: Session = Depends(get
         models.UserSettings.source == source
     ).first()
     
-    # Force threshold to 0 for Spotify since playcounts are 0
-    if source == "spotify":
-        threshold = 0
-    else:
-        threshold = settings.scrobble_threshold if settings else 50
+    threshold = settings.scrobble_threshold if settings else 50
     
     query = db.query(models.Album).filter(
         models.Album.username == username,
@@ -307,11 +311,7 @@ def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_d
         models.UserSettings.source == source
     ).first()
     
-    # Force threshold to 0 for Spotify since playcounts are 0
-    if source == "spotify":
-        threshold = 0
-    else:
-        threshold = settings.scrobble_threshold if settings else 50
+    threshold = settings.scrobble_threshold if settings else 50
 
     albums = db.query(models.Album).filter(
         models.Album.username == username,

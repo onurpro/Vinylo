@@ -12,10 +12,9 @@ import logo from '../assets/logo.svg'
 
 interface GameProps {
     username: string
-    source: string
 }
 
-export default function Game({ username, source }: GameProps) {
+export default function Game({ username }: GameProps) {
     const [matchup, setMatchup] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
     const [voting, setVoting] = useState(false)
@@ -28,7 +27,7 @@ export default function Game({ username, source }: GameProps) {
     const fetchMatchup = async () => {
         try {
             setLoading(true)
-            const res = await axios.get(`${API_BASE_URL}/api/matchup/${username}?source=${source}`)
+            const res = await axios.get(`${API_BASE_URL}/api/matchup/${username}`)
             setMatchup(res.data)
         } catch (err) {
             console.error("Failed to fetch matchup", err)
@@ -39,7 +38,7 @@ export default function Game({ username, source }: GameProps) {
 
     useEffect(() => {
         fetchMatchup()
-    }, [username, source])
+    }, [username])
 
     useEffect(() => {
         const tutorialSeen = localStorage.getItem('album_elo_tutorial_seen')
@@ -219,14 +218,6 @@ export default function Game({ username, source }: GameProps) {
                             </button>
                         </div>
                     </motion.div>
-                </div>
-            )}
-
-            {/* Spotify Attribution */}
-            {source === 'spotify' && (
-                <div className="absolute bottom-4 flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                    <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Black.png" alt="Spotify" className="h-6" />
-                    <span className="text-xs font-medium text-black">Content from Spotify</span>
                 </div>
             )}
 

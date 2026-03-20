@@ -7,11 +7,10 @@ import { API_BASE_URL } from '../config'
 
 interface StatsProps {
     username: string
-    source: string
     onBack: () => void
 }
 
-export default function Stats({ username, source, onBack }: StatsProps) {
+export default function Stats({ username, onBack }: StatsProps) {
     const [albums, setAlbums] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
@@ -20,7 +19,7 @@ export default function Stats({ username, source, onBack }: StatsProps) {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/api/stats/${username}?source=${source}`)
+                const res = await axios.get(`${API_BASE_URL}/api/stats/${username}`)
                 setAlbums(res.data)
             } catch (err) {
                 console.error("Failed to fetch stats", err)
@@ -29,7 +28,7 @@ export default function Stats({ username, source, onBack }: StatsProps) {
             }
         }
         fetchStats()
-    }, [username, source])
+    }, [username])
 
     const filteredAlbums = albums
         .filter(a =>
@@ -101,13 +100,6 @@ export default function Stats({ username, source, onBack }: StatsProps) {
                     )}
                 </div>
             </div>
-            {/* Spotify Attribution */}
-            {source === 'spotify' && (
-                <div className="mt-8 flex items-center justify-center gap-2 opacity-50 hover:opacity-100 transition-opacity pb-4">
-                    <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Black.png" alt="Spotify" className="h-6" />
-                    <span className="text-xs font-medium text-black">Content from Spotify</span>
-                </div>
-            )}
         </div>
     )
 }
