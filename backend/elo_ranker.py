@@ -3,7 +3,7 @@ import math
 K_FACTOR = 30
 
 def expected_score(rating1: float, rating2: float) -> float:
-    return 1 / (1 + math.pow(10, (rating1 - rating2) / 400))
+    return 1 / (1 + math.pow(10, (rating2 - rating1) / 400))
 
 def calculate_new_rating(rating1: float, rating2: float, actual_score: float) -> tuple[float, float]:
     """

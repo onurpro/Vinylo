@@ -54,7 +54,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center p-4">
+    <div className="h-screen bg-white text-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
       <div className="z-10 w-full">
         <AnimatePresence mode="wait">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, TrendingUp, Ban, Share2, HelpCircle } from 'lucide-react'
+import { Loader2, TrendingUp, Ban, Share2, HelpCircle, AlertCircle, RefreshCw } from 'lucide-react'
 import { toPng } from 'html-to-image'
 import type { Album } from '../types'
 
@@ -10,6 +10,8 @@ import TutorialModal from './TutorialModal'
 import { API_BASE_URL } from '../config'
 import logo from '../assets/logo.svg'
 
+const SHARE_SITE_URL = import.meta.env.VITE_SHARE_SITE_URL ?? 'vinylo.onuryildiz.me'
+
 interface GameProps {
     username: string
 }
@@ -17,6 +19,7 @@ interface GameProps {
 export default function Game({ username }: GameProps) {
     const [matchup, setMatchup] = useState<Album[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [voting, setVoting] = useState(false)
     const [showShareModal, setShowShareModal] = useState(false)
     const [showTutorial, setShowTutorial] = useState(false)
@@ -27,10 +30,12 @@ export default function Game({ username }: GameProps) {
     const fetchMatchup = async () => {
         try {
             setLoading(true)
+            setError(null)
             const res = await axios.get(`${API_BASE_URL}/api/matchup/${username}`)
             setMatchup(res.data)
-        } catch (err) {
-            console.error("Failed to fetch matchup", err)
+        } catch (err: any) {
+            const msg = err.response?.data?.detail ?? 'Could not load a matchup. Try again.'
+            setError(msg)
         } finally {
             setLoading(false)
         }
@@ -63,7 +68,6 @@ export default function Game({ username }: GameProps) {
                 winner: winner
             })
 
-            // Update local state with new scores to trigger animation
             const { new_scores } = res.data
             setMatchup(prev => prev.map((a, i) => {
                 if (i === 0) return { ...a, elo_score: new_scores.album1 }
@@ -75,6 +79,7 @@ export default function Game({ username }: GameProps) {
             await fetchMatchup()
         } catch (err) {
             console.error("Vote failed", err)
+            setError("Vote failed. Please try again.")
         } finally {
             setVoting(false)
         }
@@ -90,11 +95,12 @@ export default function Game({ username }: GameProps) {
     const confirmIgnore = async () => {
         if (!ignoreId) return
         try {
-            await axios.post(`${API_BASE_URL}/api/ignore/${ignoreId}`)
+            await axios.post(`${API_BASE_URL}/api/ignore/${ignoreId}?username=${encodeURIComponent(username)}`)
             setIgnoreId(null)
-            fetchMatchup()
+            await fetchMatchup()
         } catch (err) {
             console.error("Ignore failed", err)
+            setIgnoreId(null)
         }
     }
 
@@ -115,6 +121,22 @@ export default function Game({ username }: GameProps) {
             <div className="flex flex-col items-center justify-center h-full text-black">
                 <Loader2 className="w-12 h-12 animate-spin text-yellow-500 mb-4" />
                 <p className="text-xl font-bold tracking-widest uppercase">Finding worthy opponents...</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-black gap-4">
+                <AlertCircle className="w-12 h-12 text-red-500" />
+                <p className="text-xl font-bold text-center max-w-sm">{error}</p>
+                <button
+                    onClick={fetchMatchup}
+                    className="flex items-center gap-2 px-6 py-3 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors"
+                >
+                    <RefreshCw size={18} />
+                    Try Again
+                </button>
             </div>
         )
     }
@@ -271,7 +293,7 @@ export default function Game({ username }: GameProps) {
 
                     {/* Bottom Banner */}
                     <div className="mt-12 bg-black text-white px-10 py-3 rounded-full font-bold text-2xl tracking-widest uppercase">
-                        vinylo.onuryildiz.me
+                        {SHARE_SITE_URL}
                     </div>
                 </div>
             </div>
@@ -341,11 +363,12 @@ function AlbumCard({ album, index, onVote, onIgnore, disabled }: { album: Album,
 function RollingNumber({ value }: { value: number }) {
     const rounded = Math.round(value)
     const digits = rounded.toString().split('').map(Number)
+    const len = digits.length
 
     return (
         <div className="flex items-center justify-center overflow-hidden h-5 font-mono text-sm leading-none">
             {digits.map((digit, i) => (
-                <Digit key={i} digit={digit} />
+                <Digit key={len - 1 - i} digit={digit} />
             ))}
         </div>
     )

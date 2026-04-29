@@ -31,7 +31,7 @@ export default function IgnoredAlbums({ username, onBack }: IgnoredAlbumsProps) 
 
     const handleRestore = async (albumId: number) => {
         try {
-            await axios.post(`${API_BASE_URL}/api/unignore/${albumId}`)
+            await axios.post(`${API_BASE_URL}/api/unignore/${albumId}?username=${encodeURIComponent(username)}`)
             setAlbums(prev => prev.filter(a => a.id !== albumId))
         } catch (err) {
             console.error("Failed to restore album", err)

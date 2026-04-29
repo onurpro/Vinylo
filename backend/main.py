@@ -1,49 +1,48 @@
-import random
-import json
+import re
+import logging
 import os
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 import models, schemas, database, elo_ranker, api_client
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
-# CORS setup
-origins = [
-    "http://localhost:5173", # Vite default
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "*" # Allow all for now to fix connection issues on TrueNAS
-]
+# CORS: configure allowed origins via environment variable
+# e.g. ALLOWED_ORIGINS=http://localhost:5173,http://truenas-ip:port
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+_USERNAME_RE = re.compile(r'^[a-zA-Z0-9_-]{1,50}$')
+
+def validate_username(username: str) -> str:
+    if not _USERNAME_RE.match(username):
+        raise HTTPException(status_code=400, detail="Invalid username format")
+    return username
 
 @app.get("/")
 def read_root():
     return {"message": "AlbumELO API is running"}
 
 @app.post("/api/init/{username}")
-def initialize_user(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+def initialize_user(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     # Check if user already has data
     count = db.query(models.Album).filter(
         models.Album.username == username,
@@ -53,15 +52,14 @@ def initialize_user(username: str, source: str = "lastfm", db: Session = Depends
         return {"message": f"User {username} ({source}) already has {count} albums."}
 
     # Check for legacy JSON file in root
-    # Assuming CWD is the project root (AlbumELO)
+    import json
     json_path = f"{username}_data.json"
     if os.path.exists(json_path):
-        print(f"Found legacy data for {username}, migrating...")
+        logger.info(f"Found legacy data for {username}, migrating...")
         try:
             with open(json_path, 'r') as f:
                 data = json.load(f)
                 for item in data:
-                    # Map legacy fields to new model
                     db_album = models.Album(
                         username=username,
                         name=item['name'],
@@ -78,88 +76,81 @@ def initialize_user(username: str, source: str = "lastfm", db: Session = Depends
             db.commit()
             return {"message": f"Migrated {len(data)} albums from JSON."}
         except Exception as e:
-            print(f"Migration failed: {e}")
-            # Fallback to API fetch if migration fails?
+            logger.error(f"Migration failed: {e}")
             pass
 
     # Fetch from Last.fm
-    print(f"Fetching from Last.fm for {username}...")
+    logger.info(f"Fetching from Last.fm for {username}...")
     albums_data = api_client.fetch_albums_from_lastfm(username)
     if not albums_data:
         raise HTTPException(status_code=404, detail="Could not fetch data from Last.fm")
-    
+
     for album_dict in albums_data:
         db_album = models.Album(**album_dict)
         db.add(db_album)
-    
-    db.commit()
+
     db.commit()
     return {"message": f"Fetched {len(albums_data)} albums from Last.fm."}
 
 @app.delete("/api/reset/{username}")
-def reset_user_data(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
-    # Delete all albums for the user
+def reset_user_data(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     count = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source
     ).delete()
     db.commit()
 
-    # Delete legacy JSON file if it exists
     json_path = f"{username}_data.json"
     file_deleted = False
     if os.path.exists(json_path):
         try:
             os.remove(json_path)
             file_deleted = True
-            print(f"Deleted legacy data file: {json_path}")
+            logger.info(f"Deleted legacy data file: {json_path}")
         except Exception as e:
-            print(f"Failed to delete legacy data file {json_path}: {e}")
+            logger.error(f"Failed to delete legacy data file {json_path}: {e}")
 
     return {
-        "message": f"Deleted {count} albums for user {username}", 
+        "message": f"Deleted {count} albums for user {username}",
         "deleted_count": count,
         "legacy_file_deleted": file_deleted
     }
 
 @app.post("/api/rescan/{username}")
-def rescan_user_data(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+def rescan_user_data(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     if source != "lastfm":
         raise HTTPException(status_code=400, detail="Rescan only supported for Last.fm currently")
-        
-    print(f"Rescanning from Last.fm for {username}...")
+
+    logger.info(f"Rescanning from Last.fm for {username}...")
     albums_data = api_client.fetch_albums_from_lastfm(username)
     if not albums_data:
         raise HTTPException(status_code=404, detail="Could not fetch data from Last.fm")
-        
+
     existing_albums = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source
     ).all()
-    
-    # Create a map of (name, artist_name) -> existing album object
+
     existing_map = {(a.name, a.artist_name): a for a in existing_albums}
-    
+
     added_count = 0
     updated_count = 0
-    
+
     for album_dict in albums_data:
         key = (album_dict['name'], album_dict['artist_name'])
         if key in existing_map:
-            # Update playcount / image
             db_album = existing_map[key]
             db_album.playcount = album_dict.get('playcount', db_album.playcount)
             if album_dict.get('image_url'):
                 db_album.image_url = album_dict['image_url']
             updated_count += 1
         else:
-            # Insert new
             db_album = models.Album(**album_dict)
             db.add(db_album)
             added_count += 1
-            
+
     db.commit()
-    
+
     return {
         "message": f"Rescan complete. Added {added_count} new albums, updated {updated_count} existing albums.",
         "added": added_count,
@@ -175,142 +166,131 @@ def login_lastfm():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/callback/lastfm")
-def callback_lastfm(token: str, db: Session = Depends(get_db)):
+def callback_lastfm(token: str, db: Session = Depends(database.get_db)):
     try:
         username = api_client.get_lastfm_session(token)
-        print(f"DEBUG: Authenticated Last.fm user: {username}")
-        
-        # Check if user already has data
+        logger.info(f"Authenticated Last.fm user: {username}")
+
         count = db.query(models.Album).filter(
             models.Album.username == username,
             models.Album.source == "lastfm"
         ).count()
-        
+
         if count == 0:
-            # Fetch from Last.fm
-            print(f"Fetching from Last.fm for {username}...")
+            logger.info(f"Fetching from Last.fm for {username}...")
             albums_data = api_client.fetch_albums_from_lastfm(username)
-            
+
             if albums_data:
                 for album_dict in albums_data:
                     db_album = models.Album(**album_dict)
                     db.add(db_album)
                 db.commit()
-                print(f"DEBUG: Inserted {len(albums_data)} albums into DB")
-        
-        # Redirect to frontend
+                logger.info(f"Inserted {len(albums_data)} albums into DB for {username}")
+
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
         return RedirectResponse(url=f"{frontend_url}?username={username}&source=lastfm")
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/settings/{username}", response_model=schemas.UserSettings)
-def get_settings(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+def get_settings(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     settings = db.query(models.UserSettings).filter(
         models.UserSettings.username == username,
         models.UserSettings.source == source
     ).first()
-    
+
     if not settings:
-        # Return default settings
         return schemas.UserSettings(username=username, source=source, scrobble_threshold=50)
-    
+
     return settings
 
 @app.post("/api/settings/{username}", response_model=schemas.UserSettings)
-def update_settings(username: str, settings: schemas.UserSettingsCreate, source: str = "lastfm", db: Session = Depends(get_db)):
+def update_settings(username: str = Depends(validate_username), settings: schemas.UserSettingsCreate = ..., source: str = "lastfm", db: Session = Depends(database.get_db)):
     db_settings = db.query(models.UserSettings).filter(
         models.UserSettings.username == username,
         models.UserSettings.source == source
     ).first()
-    
+
     if not db_settings:
         db_settings = models.UserSettings(
-            username=username, 
-            source=source, 
+            username=username,
+            source=source,
             scrobble_threshold=settings.scrobble_threshold
         )
         db.add(db_settings)
     else:
         db_settings.scrobble_threshold = settings.scrobble_threshold
-        
+
     db.commit()
     db.refresh(db_settings)
     return db_settings
 
 @app.get("/api/matchup/{username}", response_model=List[schemas.Album])
-def get_matchup(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
-    # Filter active albums
-    # Logic: playcount >= 50, not ignored, no "EP"/"Single" in title (simplified for now)
-    # We can make these filters configurable later
-    
-    # Get user settings for threshold
+def get_matchup(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
+    from sqlalchemy import func
+
     settings = db.query(models.UserSettings).filter(
         models.UserSettings.username == username,
         models.UserSettings.source == source
     ).first()
-    
+
     threshold = settings.scrobble_threshold if settings else 50
-    
+
     query = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source,
         models.Album.ignored == False,
         models.Album.playcount >= threshold
     )
-    
-    # Simple exclusion of EPs/Singles
+
     excluded_keywords = [" EP", " (EP)", " - EP", " Single", " (Single)", " - Single"]
     for keyword in excluded_keywords:
         query = query.filter(models.Album.name.notilike(f"%{keyword}%"))
-        
+
     count = query.count()
     if count < 2:
         raise HTTPException(status_code=400, detail="Not enough albums for a matchup")
-        
-    # Get 2 random albums
-    # Ideally use a more efficient random selection for large DBs
-    # For now, fetch all IDs and pick 2
-    # Or use func.random()
-    
+
     random_albums = query.order_by(func.random()).limit(2).all()
     return random_albums
 
 @app.post("/api/vote")
-def vote(vote_req: schemas.VoteRequest, db: Session = Depends(get_db)):
+def vote(vote_req: schemas.VoteRequest, db: Session = Depends(database.get_db)):
     a1 = db.query(models.Album).filter(models.Album.id == vote_req.album1_id).first()
     a2 = db.query(models.Album).filter(models.Album.id == vote_req.album2_id).first()
-    
+
     if not a1 or not a2:
         raise HTTPException(status_code=404, detail="Album not found")
-        
+
+    if a1.username != a2.username:
+        raise HTTPException(status_code=400, detail="Albums belong to different users")
+
     score = 1.0 if vote_req.winner == "1" else 0.0
-    
+
     new_rating1, new_rating2 = elo_ranker.calculate_new_rating(a1.elo_score, a2.elo_score, score)
-    
+
     a1.elo_score = new_rating1
     a2.elo_score = new_rating2
-    
+
     db.commit()
-    
+
     return {
-        "success": True, 
+        "success": True,
         "new_scores": {
-            "album1": new_rating1, 
+            "album1": new_rating1,
             "album2": new_rating2
         }
     }
 
 @app.get("/api/stats/{username}", response_model=List[schemas.Album])
-def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
-    # Get user settings for threshold
+def get_stats(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     settings = db.query(models.UserSettings).filter(
         models.UserSettings.username == username,
         models.UserSettings.source == source
     ).first()
-    
+
     threshold = settings.scrobble_threshold if settings else 50
 
     albums = db.query(models.Album).filter(
@@ -322,17 +302,20 @@ def get_stats(username: str, source: str = "lastfm", db: Session = Depends(get_d
     return albums
 
 @app.post("/api/ignore/{album_id}")
-def ignore_album(album_id: int, db: Session = Depends(get_db)):
-    album = db.query(models.Album).filter(models.Album.id == album_id).first()
+def ignore_album(album_id: int, username: str, db: Session = Depends(database.get_db)):
+    album = db.query(models.Album).filter(
+        models.Album.id == album_id,
+        models.Album.username == username
+    ).first()
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
-    
+
     album.ignored = True
     db.commit()
     return {"success": True}
 
 @app.get("/api/ignored/{username}", response_model=List[schemas.Album])
-def get_ignored_albums(username: str, source: str = "lastfm", db: Session = Depends(get_db)):
+def get_ignored_albums(username: str = Depends(validate_username), source: str = "lastfm", db: Session = Depends(database.get_db)):
     albums = db.query(models.Album).filter(
         models.Album.username == username,
         models.Album.source == source,
@@ -341,11 +324,14 @@ def get_ignored_albums(username: str, source: str = "lastfm", db: Session = Depe
     return albums
 
 @app.post("/api/unignore/{album_id}")
-def unignore_album(album_id: int, db: Session = Depends(get_db)):
-    album = db.query(models.Album).filter(models.Album.id == album_id).first()
+def unignore_album(album_id: int, username: str, db: Session = Depends(database.get_db)):
+    album = db.query(models.Album).filter(
+        models.Album.id == album_id,
+        models.Album.username == username
+    ).first()
     if not album:
         raise HTTPException(status_code=404, detail="Album not found")
-    
+
     album.ignored = False
     db.commit()
     return {"success": True}

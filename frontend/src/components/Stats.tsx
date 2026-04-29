@@ -105,6 +105,7 @@ export default function Stats({ username, onBack }: StatsProps) {
 }
 
 function StatsRow({ album, rank }: { album: Album, rank: number }) {
+    const [imgError, setImgError] = useState(false)
     const isTop3 = rank <= 3
     let rankColor = "text-gray-500"
     let borderColor = "border-black"
@@ -121,7 +122,7 @@ function StatsRow({ album, rank }: { album: Album, rank: number }) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: rank * 0.05 }}
+            transition={{ delay: Math.min(rank * 0.05, 0.5) }}
             className={`flex items-center gap-6 p-4 bg-white rounded-xl border-2 ${borderColor} shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all group`}
         >
             {/* Rank */}
@@ -131,16 +132,16 @@ function StatsRow({ album, rank }: { album: Album, rank: number }) {
 
             {/* Cover */}
             <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-black flex-shrink-0 relative">
-                <img
-                    src={album.image_url || 'placeholder'}
-                    alt={album.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                    }}
-                />
-                <div className="hidden absolute inset-0 bg-gray-200 flex items-center justify-center text-2xl">💿</div>
+                {!imgError ? (
+                    <img
+                        src={album.image_url || 'placeholder'}
+                        alt={album.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-2xl">💿</div>
+                )}
             </div>
 
             {/* Info */}

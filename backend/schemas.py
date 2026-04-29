@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class AlbumBase(BaseModel):
@@ -18,14 +18,12 @@ class AlbumCreate(AlbumBase):
 
 class Album(AlbumBase):
     id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class VoteRequest(BaseModel):
     album1_id: int
     album2_id: int
-    winner: str # "1" or "2"
+    winner: str  # "1" or "2"
 
 class UserSettingsBase(BaseModel):
     scrobble_threshold: int = 50
@@ -36,6 +34,4 @@ class UserSettingsCreate(UserSettingsBase):
 class UserSettings(UserSettingsBase):
     username: str
     source: str
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

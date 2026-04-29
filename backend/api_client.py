@@ -7,7 +7,7 @@ from typing import List, Optional
 load_dotenv()
 
 LASTFM_API_KEY = os.getenv("LASTFM_API_KEY")
-LASTFM_BASE_URL = "http://ws.audioscrobbler.com/2.0"
+LASTFM_BASE_URL = "https://ws.audioscrobbler.com/2.0"
 LASTFM_SHARED_SECRET = os.getenv("LASTFM_SHARED_SECRET")
 LASTFM_REDIRECT_URI = os.getenv("LASTFM_REDIRECT_URI")
 
@@ -92,7 +92,7 @@ def get_lastfm_auth_url() -> str:
     # Last.fm doesn't strictly require a redirect_uri in the auth URL for web apps 
     # if it's configured in the API account, but we can pass it as cb.
     return (
-        f"http://www.last.fm/api/auth/"
+        f"https://www.last.fm/api/auth/"
         f"?api_key={LASTFM_API_KEY}"
         f"&cb={LASTFM_REDIRECT_URI}"
     )
